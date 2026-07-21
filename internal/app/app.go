@@ -9,21 +9,21 @@ type App struct {
 	manPath string
 	hypPath string
 	outPath string
-	reader *corpus.Reader
-	writer *corpus.Writer
+	reader  *corpus.Reader
+	writer  *corpus.Writer
 }
 
-func NewApp (manPath, hypPath, outPath string) *App{
+func NewApp(manPath, hypPath, outPath string) *App {
 	return &App{
 		manPath: manPath,
 		hypPath: hypPath,
 		outPath: outPath,
-		reader: corpus.NewReader(),
-		writer: corpus.NewWriter(),
+		reader:  corpus.NewReader(),
+		writer:  corpus.NewWriter(),
 	}
 }
 
-func (a *App) Run() error{
+func (a *App) Run() error {
 	manifests, err := a.reader.ReadManifest(a.manPath)
 	if err != nil {
 		return fmt.Errorf("Ошибкк чтения эталонов: %v", err)
@@ -34,18 +34,18 @@ func (a *App) Run() error{
 	}
 
 	result := a.evaluate(manifests, hypotheses)
-	if a.outPath != ""{
-		if err := a.writer.WriteResults(a.outPath, results); err != nil {
-            return fmt.Errorf("Ошибка записи: %w", err)
-		
-	}
 
+	if a.outPath != "" {
+		if err := a.writer.WriteResult(a.outPath, result); err != nil {
+			return fmt.Errorf("Ошибка записи: %w", err)
+
+		}
+	}
 	return nil
-	
+
 }
 
-func (a *App) evaluate(manif []corpus.Manifest, hyps []corpus.Hypothesis) []corpus.Result {	
-
+func (a *App) evaluate(manif []corpus.Manifest, hyps []corpus.Hypothesis) []corpus.Result {
 
 	return nil
 }
