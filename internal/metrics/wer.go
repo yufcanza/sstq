@@ -12,6 +12,43 @@ type WER struct {
 }
 
 func CalculateWER(manifest, hypothesis []string) WER {
+	if len(manifest) == 0 && len(hypothesis) == 0 {
+		return WER{
+			Value:       0.0,
+			Distance:    0,
+			ManifestLen: 0,
+			H:           0,
+			S:           0,
+			D:           0,
+			I:           0,
+			Ops:         []string{},
+		}
+	}
+	if len(manifest) == 0 {
+		return WER{
+			Value:       0.0,
+			Distance:    len(hypothesis),
+			ManifestLen: 0,
+			H:           0,
+			S:           0,
+			D:           0,
+			I:           len(hypothesis),
+			Ops:         make([]string, len(hypothesis)),
+		}
+	}
+	if len(hypothesis) == 0 {
+		return WER{
+			Value:       0.0,
+			Distance:    len(manifest),
+			ManifestLen: 0,
+			H:           0,
+			S:           0,
+			D:           0,
+			I:           len(manifest),
+			Ops:         make([]string, len(manifest)),
+		}
+	}
+
 	result := Levenshtein(manifest, hypothesis)
 
 	hits := 0

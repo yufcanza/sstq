@@ -1,0 +1,10 @@
+{"id":"sample1","text":"мама мыла раму","tags":["clean","test"]}
+{"id":"sample2","text":"привет как дела","tags":["clean"]}
+{"id":"sample3","text":"ёжик где ты","tags":["noisy"]}
+{"id":"sample4","text":"это тестовое предложение","tags":["clean","long"]}
+{"id":"sample5","text":"мама мыла раму","tags":["duplicate"]}
+{"id":"sample6","text":"hello world","tags":["en"]}
+{"id":"sample7","text":"кот спит","tags":["clean","short"]}
+{"id":"sample8","text":"","tags":["empty"]}
+{"id":"sample9","text":"привет","tags":["short"]}
+{"id":"sample10","text":"мама мыла раму","tags":["extra"]}

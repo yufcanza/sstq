@@ -13,6 +13,44 @@ type CER struct {
 
 func CalculateCER(manifest, hypothesis string) CER {
 
+	if manifest == "" && hypothesis == "" {
+		return CER{
+			Value:       0.0,
+			Distance:    0,
+			ManifestLen: 0,
+			H:           0,
+			S:           0,
+			D:           0,
+			I:           0,
+			Ops:         []string{},
+		}
+	}
+	if manifest == "" {
+		hypRune := []rune(hypothesis)
+		return CER{
+			Value:       0.0,
+			Distance:    len(hypRune),
+			ManifestLen: 0,
+			H:           0,
+			S:           0,
+			D:           0,
+			I:           len(hypRune),
+			Ops:         make([]string, len(hypRune)),
+		}
+	}
+	if hypothesis == "" {
+		manRune := []rune(manifest)
+		return CER{
+			Value:       1.0,
+			Distance:    len(manRune),
+			ManifestLen: len(manRune),
+			H:           0,
+			S:           0,
+			D:           len(manRune),
+			I:           0,
+			Ops:         make([]string, len(manRune)),
+		}
+	}
 	manRune := []rune(manifest)
 	hypRune := []rune(hypothesis)
 

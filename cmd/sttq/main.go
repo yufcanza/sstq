@@ -2,18 +2,32 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"sttq/internal/app"
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		os.Exit(1)
+	}
+	command := os.Args[1]
+	if command == "evaluate" {
+		runEvaluate()
+	}
+}
+func runEvaluate() {
+	//flags := flag.NewFlagSet(command, flag.ExitOnError)
 	var (
 		manPath = flag.String("manifest", "", "Путь к файлу с эталонами")
 		hypPath = flag.String("hypotheses", "", "Путь к файлу с гипотезами")
 		norm    = flag.String("normalization", "", "Профиль нормализации")
 		outPath = flag.String("out", "", "Выход")
 	)
-	flag.Parse()
-
+	fmt.Print(os.Args[1:], "\n")
+	flag.CommandLine.Parse(os.Args[2:])
+	fmt.Printf("%v, %v, %v, %v", *manPath, *hypPath, *norm, *outPath)
 	if *manPath == "" {
 		log.Fatal("Не указан файл эталонов")
 	}
@@ -25,6 +39,11 @@ func main() {
 	}
 	if *outPath == "" {
 		log.Printf("Не указан выходной файл")
+	}
+
+	StartEval := app.NewApp(*manPath, *hypPath, *outPath, *norm)
+	if err := StartEval.Run(); err != nil {
+		log.Fatalf("Ошибка выполнения: %v", err)
 	}
 
 }

@@ -47,7 +47,7 @@ type ReplaceTransform struct{}
 
 func (t ReplaceTransform) Apply(text string) string {
 	result := strings.ReplaceAll(text, "ё", "е")
-	result = strings.ReplaceAll(text, "Ё", "е")
+	result = strings.ReplaceAll(result, "Ё", "е")
 	return result
 }
 

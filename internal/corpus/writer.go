@@ -19,7 +19,7 @@ type Result struct {
 	ReferenceWords      int                     `json:"reference_words"`
 	Hits                int                     `json:"hits"`
 	Substitution        int                     `json:"substitutions"`
-	Detetions           int                     `json:"deletions"`
+	Deletions           int                     `json:"deletions"`
 	Insertion           int                     `jsin:"insertions"`
 	WER                 float64                 `json:"wer"`
 	CER                 float64                 `json:"cer"`
@@ -43,6 +43,7 @@ func (w *Writer) WriteResult(path string, results []Result) error {
 	defer writer.Flush()
 
 	encoder := json.NewEncoder(writer)
+	encoder.SetIndent("", "  ")
 
 	for _, result := range results {
 		if err := encoder.Encode(result); err != nil {
