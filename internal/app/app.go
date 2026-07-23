@@ -58,14 +58,13 @@ func (a *App) evaluate(manif []corpus.Manifest, hyps []corpus.Hypothesis) []corp
 		hypMap[h.ID] = h
 	}
 	var results []corpus.Result
-	fmt.Printf("Profile: %v", a.normProfile)
 
 	for _, man := range manif {
 		hyp, exists := hypMap[man.ID]
 		if !exists {
 			continue
 		}
-
+		fmt.Printf(" Profile: %v", a.normProfile)
 		normalizedRef := a.normalizer.Normalize(man.Text)
 		normalizedHyp := a.normalizer.Normalize(hyp.Text)
 

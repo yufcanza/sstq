@@ -83,7 +83,7 @@ func CalculateCER(manifest, hypothesis string) CER {
 			insertions++
 		}
 	}
-	manLen := len(manifest)
+	manLen := len(manRune)
 	cer := 0.0
 	if manLen > 0 {
 		cer = float64(result.Distance) / float64(manLen)
