@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"sttq/internal/app"
@@ -20,14 +19,14 @@ func main() {
 func runEvaluate() {
 	//flags := flag.NewFlagSet(command, flag.ExitOnError)
 	var (
-		manPath = flag.String("manifest", "", "Путь к файлу с эталонами")
-		hypPath = flag.String("hypotheses", "", "Путь к файлу с гипотезами")
-		norm    = flag.String("normalization", "", "Профиль нормализации")
-		outPath = flag.String("out", "", "Выход")
+		manPath = flag.String("manifest", "corpus/manifest.jsonl", "Путь к файлу с эталонами")
+		hypPath = flag.String("hypotheses", "run.jsonl", "Путь к файлу с гипотезами")
+		norm    = flag.String("normalization", "ru-default", "Профиль нормализации")
+		outPath = flag.String("out", "report.json", "Выход")
 	)
-	fmt.Print(os.Args[1:], "\n")
-	flag.CommandLine.Parse(os.Args[2:])
-	fmt.Printf("%v, %v, %v, %v", *manPath, *hypPath, *norm, *outPath)
+	//fmt.Print(os.Args[1:], "\n")
+	//flag.CommandLine.Parse(os.Args[2:])
+	//fmt.Printf("%v, %v, %v, %v", *manPath, *hypPath, *norm, *outPath)
 	if *manPath == "" {
 		log.Fatal("Не указан файл эталонов")
 	}

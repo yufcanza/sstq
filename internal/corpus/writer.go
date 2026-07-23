@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"sttq/internal/metrics"
 )
@@ -41,11 +42,17 @@ func (w *Writer) WriteResult(path string, results []Result) error {
 
 	writer := bufio.NewWriter(file)
 	defer writer.Flush()
+	roundedResult := make([]Result, len(results))
+	for i, r := range results {
+		roundedResult[i] = r
+		roundedResult[i].WER = math.Round(r.WER*1000000) / 1000000
+		roundedResult[i].CER = math.Round(r.CER*1000000) / 1000000
+	}
 
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
 
-	for _, result := range results {
+	for _, result := range roundedResult {
 		if err := encoder.Encode(result); err != nil {
 			return fmt.Errorf("Ошибка записи результата: %v", err)
 		}
