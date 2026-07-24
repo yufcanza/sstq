@@ -2,9 +2,7 @@ package app
 
 import (
 	"fmt"
-	"strings"
 	"sttq/internal/corpus"
-	"sttq/internal/metrics"
 	"sttq/internal/normalize"
 )
 
@@ -40,7 +38,7 @@ func (a *App) Run() error {
 		return fmt.Errorf("Ошибкк чтения гипотез: %v", err)
 	}
 
-	result := a.evaluate(manifests, hypotheses)
+	result := corpus.Evaluate(manifests, hypotheses, a.normalizer)
 
 	if a.outPath != "" {
 		if err := a.writer.WriteResult(a.outPath, result); err != nil {
@@ -50,50 +48,4 @@ func (a *App) Run() error {
 	}
 	return nil
 
-}
-
-func (a *App) evaluate(manif []corpus.Manifest, hyps []corpus.Hypothesis) []corpus.Result {
-	hypMap := make(map[string]corpus.Hypothesis)
-	for _, h := range hyps {
-		hypMap[h.ID] = h
-	}
-	var results []corpus.Result
-
-	for _, man := range manif {
-		hyp, exists := hypMap[man.ID]
-		if !exists {
-			continue
-		}
-		//fmt.Printf(" Profile: %v", a.normProfile)
-		normalizedRef := a.normalizer.Normalize(man.Text)
-		normalizedHyp := a.normalizer.Normalize(hyp.Text)
-
-		tokenRef := strings.Fields(normalizedRef)
-		tokenHyp := strings.Fields(normalizedHyp)
-
-		werResult := metrics.CalculateWER(tokenRef, tokenHyp)
-		cerResult := metrics.CalculateCER(normalizedRef, normalizedHyp)
-		alignment := metrics.CreateAlignment(tokenRef, tokenHyp)
-
-		result := corpus.Result{
-			ID:                  man.ID,
-			Reference:           man.Text,
-			Hypothesis:          hyp.Text,
-			NormalizedReference: normalizedRef,
-			NormalizeHypothesis: normalizedHyp,
-			ReferenceWords:      werResult.ManifestLen,
-			Hits:                werResult.H,
-			Substitution:        werResult.S,
-			Deletions:           werResult.D,
-			Insertion:           werResult.I,
-			WER:                 werResult.Value,
-			CER:                 cerResult.Value,
-			ExactMath:           normalizedRef == normalizedHyp,
-			Tags:                man.Tags,
-			Alignment:           alignment.Items,
-		}
-		results = append(results, result)
-
-	}
-	return results
 }

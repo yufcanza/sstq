@@ -1,0 +1,53 @@
+package corpus
+
+import (
+	"strings"
+	"sttq/internal/metrics"
+	"sttq/internal/normalize"
+)
+
+func Evaluate(manif []Manifest, hyps []Hypothesis, normalizer *normalize.Normalizer) []Result {
+	hypMap := make(map[string]Hypothesis)
+	for _, h := range hyps {
+		hypMap[h.ID] = h
+	}
+	var results []Result
+
+	for _, man := range manif {
+		hyp, exists := hypMap[man.ID]
+		if !exists {
+			continue
+		}
+		//fmt.Printf(" Profile: %v", a.normProfile)
+		normalizedRef := normalizer.Normalize(man.Text)
+		normalizedHyp := normalizer.Normalize(hyp.Text)
+
+		tokenRef := strings.Fields(normalizedRef)
+		tokenHyp := strings.Fields(normalizedHyp)
+
+		werResult := metrics.CalculateWER(tokenRef, tokenHyp)
+		cerResult := metrics.CalculateCER(normalizedRef, normalizedHyp)
+		alignment := metrics.CreateAlignment(tokenRef, tokenHyp)
+
+		result := Result{
+			ID:                  man.ID,
+			Reference:           man.Text,
+			Hypothesis:          hyp.Text,
+			NormalizedReference: normalizedRef,
+			NormalizeHypothesis: normalizedHyp,
+			ReferenceWords:      werResult.ManifestLen,
+			Hits:                werResult.H,
+			Substitution:        werResult.S,
+			Deletions:           werResult.D,
+			Insertion:           werResult.I,
+			WER:                 werResult.Value,
+			CER:                 cerResult.Value,
+			ExactMath:           normalizedRef == normalizedHyp,
+			Tags:                man.Tags,
+			Alignment:           alignment.Items,
+		}
+		results = append(results, result)
+
+	}
+	return results
+}

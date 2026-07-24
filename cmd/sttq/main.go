@@ -25,7 +25,7 @@ func runEvaluate() {
 		outPath = flag.String("out", "report.json", "Выход")
 	)
 	//fmt.Print(os.Args[1:], "\n")
-	//flag.CommandLine.Parse(os.Args[2:])
+	flag.CommandLine.Parse(os.Args[2:])
 	//fmt.Printf("%v, %v, %v, %v", *manPath, *hypPath, *norm, *outPath)
 	if *manPath == "" {
 		log.Fatal("Не указан файл эталонов")

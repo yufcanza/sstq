@@ -2,9 +2,12 @@ package corpus
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Reader struct {
@@ -80,4 +83,35 @@ func (r *Reader) ReadHypotheses(path string) ([]Hypothesis, error) {
 		return nil, fmt.Errorf("Ошибка чтение файла%v", err)
 	}
 	return hypotheses, nil
+}
+
+func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, error) {
+	var records []ProcessedRecord
+
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		var raw GolosRecord
+		if err := json.Unmarshal([]byte(line), &raw); err != nil {
+			return nil, fmt.Errorf("Ошибка обработки JSON: %v", err)
+		}
+
+		normalizedPath := filepath.ToSlash(raw.AudioFilePath)
+		hashString := seed + ":" + domain + ":" + normalizedPath
+		hash := sha256.Sum256([]byte(hashString))
+		id := fmt.Sprintf("%s-%x", domain, hash[:6])
+
+		records = append(records, ProcessedRecord{
+			Domain:        domain,
+			AudioFilepath: raw.AudioFilePath,
+			Text:          raw.Text,
+			Duration:      raw.Duration,
+			ID:            id,
+		})
+	}
+	return records, nil
 }
