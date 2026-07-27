@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"sttq/internal/app"
@@ -12,8 +13,12 @@ func main() {
 		os.Exit(1)
 	}
 	command := os.Args[1]
-	if command == "evaluate" {
+	switch command {
+	case "evaluate":
 		runEvaluate()
+
+	case "import-golos":
+		runImport()
 	}
 }
 func runEvaluate() {
@@ -40,9 +45,26 @@ func runEvaluate() {
 		log.Printf("Не указан выходной файл")
 	}
 
-	StartEval := app.NewApp(*manPath, *hypPath, *outPath, *norm)
+	StartEval := app.NewEvalApp(*manPath, *hypPath, *outPath, *norm)
 	if err := StartEval.Run(); err != nil {
 		log.Fatalf("Ошибка выполнения: %v", err)
 	}
 
+}
+
+func runImport() {
+	var (
+		archivePath = flag.String("archive", "test.tar", "Путь к архиву")
+		quota       = flag.String("quota", "crowd=200,farfield=50", "Квоты")
+		seed        = flag.String("seed", "intership-2026", "Сид")
+		outPath     = flag.String("out", "corpus", "Вывод")
+	)
+	fmt.Print(os.Args[1:], "\n")
+	flag.CommandLine.Parse(os.Args[2:])
+	fmt.Printf("%v, %v, %v, %v", *archivePath, *quota, *seed, *outPath)
+
+	StartImport := app.NewImportApp(*archivePath, *quota, *seed, *outPath)
+	if err := StartImport.Run(); err != nil {
+		log.Fatalf("Ошибка выполнения: %v", err)
+	}
 }

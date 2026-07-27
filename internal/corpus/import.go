@@ -1,6 +1,8 @@
 package corpus
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -19,8 +21,8 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	if err := ExtractTar(config.ArchivePath, tmpDir); err != nil {
 		return nil, fmt.Errorf("Ошика распаковки архива: %v", err)
 	}
-	crowdManifest := filepath.Join(tmpDir, "crowd", "manifest.jsonl")
-	farfieldManifest := filepath.Join(tmpDir, "farfield", "manifest.jsonl")
+	crowdManifest := filepath.Join(tmpDir, "test", "crowd", "manifest.jsonl")
+	farfieldManifest := filepath.Join(tmpDir, "test", "farfield", "manifest.jsonl")
 	crowdData, err := os.ReadFile(crowdManifest)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка чтения crowd/manifest.jsonl: %w", err)
@@ -33,7 +35,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка парсинга файла crowd: %v", err)
 	}
-	farfieldRecords, err := parseManifest(farfieldData, "crowd", config.Seed)
+	farfieldRecords, err := parseManifest(farfieldData, "farfield", config.Seed)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка парсинга файла farfield: %v", err)
 	}
@@ -47,12 +49,15 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		return nil, fmt.Errorf("Ошибка создания папки audio: %v", err)
 	}
 
+	var finalRecords []Record
+	var totalDuration int64
+
 	for _, rec := range selected {
 		if config.MaxDuration > 0 && time.Duration(rec.Duration*float64(time.Second)) > config.MaxDuration {
 			continue
 		}
 		filename := filepath.Base(rec.AudioFilepath)
-		srcPath := filepath.Join(tmpDir, rec.Domain, "files", filename)
+		srcPath := filepath.Join(tmpDir, "test", rec.Domain, "files", filename)
 		if _, err := os.Stat(srcPath); os.IsNotExist(err) {
 			continue
 		}
@@ -61,14 +66,45 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 			return nil, fmt.Errorf("Ошибка копирования аудио %s: %w", rec.ID, err)
 		}
 
+		sha256Hash, err := FindSHA256(dstPath)
+		if err != nil {
+			return nil, fmt.Errorf("Ошика вычисления sha256 для %s: %v", dstPath, err)
+		}
+
+		sampleRate := 16000
+		channels := 1
+		durationS := int64(rec.Duration * 1000)
+
+		finalRecords = append(finalRecords, Record{
+			ID:         rec.ID,
+			Audio:      filepath.Join("audio", rec.ID+".wav"),
+			Text:       rec.Text,
+			Language:   "ru",
+			Duration:   int(durationS),
+			SampleRate: sampleRate,
+			Channels:   channels,
+			Tags:       []string{rec.Domain},
+			SHA256:     sha256Hash,
+		})
+		totalDuration += durationS
+
+	}
+
+	sort.Slice(finalRecords, func(i, j int) bool {
+		return finalRecords[i].ID < finalRecords[j].ID
+	})
+
+	manifestPath := filepath.Join(config.OutDir, "manifest.jsonl")
+	if err := NewWriter().WriteManifest(manifestPath, finalRecords); err != nil {
+
 	}
 
 	summary := &ImportSummary{
-		SourceRecords:    0,
-		SelectedRecord:   0,
-		SelectedDuration: 0,
+		SourceRecords:    len(allRecords),
+		SelectedRecord:   len(finalRecords),
+		SelectedDuration: int(totalDuration),
 		ByTag:            nil,
-		Skipped:          nil,
+		Skipped:          map[string]int{},
 	}
 	return summary, nil
 
@@ -85,17 +121,27 @@ func SelectRecord(records []ProcessedRecord, quotas map[string]int, limit int) [
 	for domain, quota := range quotas {
 		recs := byDomain[domain]
 		sort.Slice(recs, func(i, j int) bool {
-			return recs[i].ID < recs[j].ID
+			return string(recs[i].SortHash[:]) < string(recs[j].SortHash[:])
 		})
 
 		take := quota
 		if len(recs) < take {
-			for i := 0; i < take; i++ {
-				selected = append(selected, recs[i])
-			}
+			take = len(recs)
 		}
+		selected = append(selected, recs[:take]...)
 
 	}
+	if limit > 0 && len(selected) > limit {
+		sort.Slice(selected, func(i, j int) bool {
+			return string(selected[i].SortHash[:]) < string(selected[j].SortHash[:])
+		})
+		selected = selected[:limit]
+	}
+
+	sort.Slice(selected, func(i, j int) bool {
+		return selected[i].ID < selected[j].ID
+	})
+
 	return selected
 }
 
@@ -117,4 +163,18 @@ func copyFile(src, dst string) error {
 	}
 
 	return nil
+}
+
+func FindSHA256(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }

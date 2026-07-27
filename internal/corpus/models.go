@@ -27,6 +27,7 @@ type ProcessedRecord struct {
 type Record struct {
 	ID         string   `json:"id"`
 	Audio      string   `json:"audio"`
+	Text       string   `json:"text"`
 	Language   string   `json:"language"`
 	Duration   int      `json:"duration_ms"`
 	SampleRate int      `json:"sample_rate"`

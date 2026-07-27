@@ -101,16 +101,18 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 		}
 
 		normalizedPath := filepath.ToSlash(raw.AudioFilePath)
-		hashString := seed + ":" + domain + ":" + normalizedPath
+		hashString := domain + ":" + normalizedPath
 		hash := sha256.Sum256([]byte(hashString))
 		id := fmt.Sprintf("%s-%x", domain, hash[:6])
-
+		hashString = seed + ":" + domain + ":" + normalizedPath
+		sortHash := sha256.Sum256([]byte(hashString))
 		records = append(records, ProcessedRecord{
 			Domain:        domain,
 			AudioFilepath: raw.AudioFilePath,
 			Text:          raw.Text,
 			Duration:      raw.Duration,
 			ID:            id,
+			SortHash: sortHash,
 		})
 	}
 	return records, nil

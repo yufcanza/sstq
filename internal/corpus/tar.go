@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func ExtractTar(tarPath, destdir string) error {
@@ -20,6 +21,7 @@ func ExtractTar(tarPath, destdir string) error {
 	}
 
 	tr := tar.NewReader(file)
+	cleanDest := filepath.Clean(destdir)
 	for {
 		header, err := tr.Next()
 		if err == io.EOF {
@@ -29,7 +31,15 @@ func ExtractTar(tarPath, destdir string) error {
 			return fmt.Errorf("Ошибка чтения архива: %v", err)
 
 		}
+		if header.Typeflag == tar.TypeSymlink || header.Typeflag == tar.TypeLink {
+			continue
+		}
 		targetPath := filepath.Join(destdir, header.Name)
+		cleanTarget := filepath.Clean(targetPath)
+
+		if !strings.HasPrefix(cleanTarget, cleanDest+string(os.PathSeparator)) && cleanTarget != cleanDest {
+			continue
+		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:

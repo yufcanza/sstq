@@ -109,6 +109,48 @@ func TestCER(t *testing.T) {
 				I:           0,
 			},
 		},
+		{
+			name: "english",
+			ref:  "hello мир",
+			hyp:  "hello world",
+			want: CER{
+				Value:       5.0 / 9.0,
+				Distance:    5,
+				ManifestLen: 9,
+				H:           6,
+				S:           3,
+				D:           0,
+				I:           2,
+			},
+		},
+		{
+			name: "mixed",
+			ref:  "hello wоrld",
+			hyp:  "hello world",
+			want: CER{
+				Value:       1.0 / 11.0,
+				Distance:    1,
+				ManifestLen: 11,
+				H:           10,
+				S:           1,
+				D:           0,
+				I:           0,
+			},
+		},
+		{
+			name: "alignment (ab - ba)",
+			ref:  "ab",
+			hyp:  "ba",
+			want: CER{
+				Value:       1.0,
+				Distance:    2,
+				ManifestLen: 2,
+				H:           0,
+				S:           2,
+				D:           0,
+				I:           0,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

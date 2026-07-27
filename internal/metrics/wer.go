@@ -38,13 +38,13 @@ func CalculateWER(manifest, hypothesis []string) WER {
 	}
 	if len(hypothesis) == 0 {
 		return WER{
-			Value:       0.0,
+			Value:       1.0,
 			Distance:    len(manifest),
-			ManifestLen: 0,
+			ManifestLen: len(manifest),
 			H:           0,
 			S:           0,
-			D:           0,
-			I:           len(manifest),
+			D:           len(manifest),
+			I:           0,
 			Ops:         make([]string, len(manifest)),
 		}
 	}

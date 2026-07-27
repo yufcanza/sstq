@@ -74,6 +74,33 @@ func TestAlignment(t *testing.T) {
 				{Type: "equal", Manifest: "раму", Hypothesis: "раму"},
 			},
 		},
+		{
+			name: "english",
+			ref:  []string{"привет", "мир"},
+			hyp:  []string{"hello", "мир"},
+			want: []AlignmentItem{
+				{Type: "substitute", Manifest: "привет", Hypothesis: "hello"},
+				{Type: "equal", Manifest: "мир", Hypothesis: "мир"},
+			},
+		},
+		{
+			name: "mixed_text",
+			ref:  []string{"Hello", "wоrld"},
+			hyp:  []string{"Hello", "world"},
+			want: []AlignmentItem{
+				{Type: "equal", Manifest: "Hello", Hypothesis: "Hello"},
+				{Type: "substitute", Manifest: "wоrld", Hypothesis: "world"},
+			},
+		},
+		{
+			name: "ab - ba",
+			ref:  []string{"a", "b"},
+			hyp:  []string{"b", "a"},
+			want: []AlignmentItem{
+				{Type: "substitute", Manifest: "a", Hypothesis: "b"},
+				{Type: "substitute", Manifest: "b", Hypothesis: "a"},
+			},
+		},
 	}
 
 	for _, tt := range tests {
