@@ -51,6 +51,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 
 	var finalRecords []Record
 	var totalDuration int64
+	var selected_ids []string
 
 	for _, rec := range selected {
 		if config.MaxDuration > 0 && time.Duration(rec.Duration*float64(time.Second)) > config.MaxDuration {
@@ -86,6 +87,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 			Tags:       []string{rec.Domain},
 			SHA256:     sha256Hash,
 		})
+		selected_ids = append(selected_ids, rec.ID)
 		totalDuration += durationS
 
 	}
@@ -98,13 +100,29 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	if err := NewWriter().WriteManifest(manifestPath, finalRecords); err != nil {
 
 	}
+	selectionPath := filepath.Join(config.OutDir, "selection.json")
+	SelectionInfo := SelectionInfo{
+		Source:         "golos-test",
+		Seed:           config.Seed,
+		RequestRecords: config.Limit,
+		MaxDuration:    int64(config.MaxDuration / time.Millisecond),
+		Quotas:         config.Quotas,
+		SelectedIDs:    selected_ids,
+	}
+	if err := writeJSON(selectionPath, SelectionInfo); err != nil {
+		return nil, fmt.Errorf("Ошибка записи selection.json: %v", err)
+	}
 
 	summary := &ImportSummary{
 		SourceRecords:    len(allRecords),
 		SelectedRecord:   len(finalRecords),
-		SelectedDuration: int(totalDuration),
-		ByTag:            nil,
+		SelectedDuration: totalDuration,
+		ByTag:            countByTag(finalRecords),
 		Skipped:          map[string]int{},
+	}
+	summaryPath := filepath.Join(config.OutDir, "import-summary.json")
+	if err := writeJSON(summaryPath, summary); err != nil {
+		return nil, fmt.Errorf("Ошибка записи import-summary.json: %w", err)
 	}
 	return summary, nil
 
@@ -177,4 +195,14 @@ func FindSHA256(path string) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+func countByTag(records []Record) map[string]int {
+	result := make(map[string]int)
+	for _, rec := range records {
+		for _, tag := range rec.Tags {
+			result[tag]++
+		}
+	}
+	return result
 }

@@ -1,11 +1,15 @@
 package corpus
 
-import "time"
+import (
+	"sttq/internal/metrics"
+	"time"
+)
 
 type Manifest struct {
-	ID   string   `json:"id"`
-	Text string   `json:"text"`
-	Tags []string `json:"tags,omitempty"`
+	ID         string   `json:"id"`
+	Text       string   `json:"text"`
+	Tags       []string `json:"tags,omitempty"`
+	DurationMS int64    `json:"duration_ms,omitempty"`
 }
 type Hypothesis struct {
 	ID   string `json:"id"`
@@ -47,7 +51,36 @@ type ImportConfig struct {
 type ImportSummary struct {
 	SourceRecords    int            `json:"source_records"`
 	SelectedRecord   int            `json:"selected_records"`
-	SelectedDuration int            `json:"selected_duration_ms"`
+	SelectedDuration int64            `json:"selected_duration_ms"`
 	ByTag            map[string]int `json:"by_tag"`
 	Skipped          map[string]int `json:"skipped"`
+}
+type SelectionInfo struct {
+	Source string `json:"source"`
+	Seed string `json:"string"`
+	RequestRecords int `json:"request_records"`
+	MaxDuration int64 `json:"max_duration_ms"`
+	Quotas map[string]int `json:"quotas"`
+	SelectedIDs []string `json:"selected_ids"`
+
+}
+type Result struct {
+	ID                  string   `json:"id"`
+	Reference           string   `json:"reference"`
+	Hypothesis          string   `json:"hypothesis"`
+	NormalizedReference string   `json:"normalized_reference"`
+	NormalizeHypothesis string   `json:"normalized_hypothesis"`
+	ReferenceWords      int      `json:"reference_words"`
+	Hits                int      `json:"hits"`
+	Substitutions       int      `json:"substitutions"`
+	Deletions           int      `json:"deletions"`
+	Insertions          int      `json:"insertions"`
+	WER                 float64  `json:"wer"`
+	CER                 float64  `json:"cer"`
+	ExactMatch          bool     `json:"exact_match"`
+	Tags                []string `json:"tags,omitempty"`
+	DurationMS          int64    `json:"duration_ms,omitempty"`
+	RecognitionTimeMS   int64    `json:"recognition_time_ms,omitempty"`
+
+	Alignment []metrics.AlignmentItem `json:"alignment"`
 }

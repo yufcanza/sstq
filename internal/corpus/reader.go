@@ -112,7 +112,7 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 			Text:          raw.Text,
 			Duration:      raw.Duration,
 			ID:            id,
-			SortHash: sortHash,
+			SortHash:      sortHash,
 		})
 	}
 	return records, nil

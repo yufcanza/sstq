@@ -43,6 +43,7 @@ func Evaluate(manif []Manifest, hyps []Hypothesis, normalizer *normalize.Normali
 			WER:                 werResult.Value,
 			CER:                 cerResult.Value,
 			ExactMatch:          normalizedRef == normalizedHyp,
+			DurationMS:          man.DurationMS,
 			Tags:                man.Tags,
 			Alignment:           alignment.Items,
 		}

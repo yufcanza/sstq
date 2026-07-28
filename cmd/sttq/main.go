@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"sttq/internal/app"
 )
 
@@ -52,19 +54,60 @@ func runEvaluate() {
 
 }
 
+type quotaSlice []string
+
+func (q *quotaSlice) Set(value string) error {
+	*q = append(*q, strings.TrimSpace(value))
+	return nil
+}
+func (q *quotaSlice) String() string {
+	return strings.Join(*q, ", ")
+}
+
 func runImport() {
+	flags := flag.NewFlagSet("import-golos", flag.ExitOnError)
 	var (
 		archivePath = flag.String("archive", "test.tar", "Путь к архиву")
-		quota       = flag.String("quota", "crowd=200,farfield=50", "Квоты")
-		seed        = flag.String("seed", "intership-2026", "Сид")
-		outPath     = flag.String("out", "corpus", "Вывод")
+		//quota       = flag.String("quota", "crowd=200,farfield=50", "Квоты")
+		seed    = flag.String("seed", "intership-2026", "Сид")
+		outPath = flag.String("out", "corpus", "Вывод")
 	)
-	fmt.Print(os.Args[1:], "\n")
-	flag.CommandLine.Parse(os.Args[2:])
-	fmt.Printf("%v, %v, %v, %v", *archivePath, *quota, *seed, *outPath)
+	var quotas quotaSlice
+	flags.Var(&quotas, "quota", "Квота")
 
-	StartImport := app.NewImportApp(*archivePath, *quota, *seed, *outPath)
+	fmt.Print(os.Args[1:], "\n")
+	flags.Parse(os.Args[2:])
+	quotaMap := parseQuotas(quotas)
+	fmt.Printf("%v, %v, %v, %v", *archivePath, quotaMap, *seed, *outPath)
+
+	StartImport := app.NewImportApp(*archivePath, quotaMap, *seed, *outPath)
 	if err := StartImport.Run(); err != nil {
 		log.Fatalf("Ошибка выполнения: %v", err)
 	}
+}
+
+func parseQuotas(qs quotaSlice) map[string]int {
+	result := make(map[string]int)
+
+	if len(qs) == 0 {
+		// Значения по умолчанию
+		result["crowd"] = 200
+		result["farfield"] = 50
+		return result
+	}
+
+	for _, q := range qs {
+		parts := strings.Split(q, "=")
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+		if err != nil {
+			continue
+		}
+		result[key] = val
+	}
+
+	return result
 }

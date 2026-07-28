@@ -2,9 +2,10 @@ package app
 
 import (
 	"fmt"
-	"strings"
 	"sttq/internal/corpus"
 	"sttq/internal/normalize"
+	"sttq/internal/report"
+	"time"
 )
 
 type EvalApp struct {
@@ -40,8 +41,11 @@ func (a *EvalApp) Run() error {
 
 	result := corpus.Evaluate(manifests, hypotheses, a.normalizer)
 
+	builder := report.NewBuilder()
+	reportData := builder.Build(result, nil)
+
 	if a.outPath != "" {
-		if err := a.writer.WriteResult(a.outPath, result); err != nil {
+		if err := report.Write(a.outPath, reportData); err != nil {
 			return fmt.Errorf("Ошибка записи: %w", err)
 
 		}
@@ -52,12 +56,12 @@ func (a *EvalApp) Run() error {
 
 type ImportApp struct {
 	archivePath string
-	quotas      string
+	quotas      map[string]int
 	seed        string
 	outPath     string
 }
 
-func NewImportApp(archivePath, quotas, seed, outPath string) *ImportApp {
+func NewImportApp(archivePath string, quotas map[string]int, seed, outPath string) *ImportApp {
 	return &ImportApp{
 		archivePath: archivePath,
 		quotas:      quotas,
@@ -67,14 +71,13 @@ func NewImportApp(archivePath, quotas, seed, outPath string) *ImportApp {
 }
 
 func (a *ImportApp) Run() error {
-	quotas := parseQuotas(a.quotas)
 	config := corpus.ImportConfig{
 		ArchivePath: a.archivePath,
 		OutDir:      a.outPath,
 		Limit:       250,
-		MaxDuration: 30,
+		MaxDuration: 30 * time.Minute,
 		Seed:        a.seed,
-		Quotas:      quotas,
+		Quotas:      a.quotas,
 	}
 
 	_, err := corpus.ImportGolos(config)
@@ -83,21 +86,4 @@ func (a *ImportApp) Run() error {
 	}
 
 	return nil
-}
-
-func parseQuotas(s string) map[string]int {
-	quotas := make(map[string]int)
-	if s == "" {
-		return quotas
-	}
-	parts := strings.Split(s, ",")
-	for _, part := range parts {
-		k := strings.Split(part, "=")
-		if len(k) == 2 {
-			val := 0
-			fmt.Sscanf(k[1], "%d", &val)
-			quotas[k[0]] = val
-		}
-	}
-	return quotas
 }
