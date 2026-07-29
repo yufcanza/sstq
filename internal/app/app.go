@@ -87,3 +87,42 @@ func (a *ImportApp) Run() error {
 
 	return nil
 }
+
+type StatApp struct {
+	manPath string
+}
+
+func NewStatsApp(manifest string) *StatApp {
+	return &StatApp{
+		manPath: manifest,
+	}
+}
+func (a *StatApp) Run() error {
+	err := corpus.Statistic(a.manPath)
+	if err != nil {
+		return fmt.Errorf("Ошибка статистики: %v", err)
+	}
+	return nil
+}
+
+type ValidateApp struct {
+	manPath string
+}
+
+func NewValidateApp(manifest string) *ValidateApp {
+	return &ValidateApp{
+		manPath: manifest,
+	}
+}
+func (a *ValidateApp) Run() error {
+	valid, err := corpus.Validation(a.manPath)
+	if err != nil {
+		return fmt.Errorf("Ошибка статистики: %v", err)
+	}
+	if !valid {
+		return fmt.Errorf("Corpus invalid")
+	}
+	fmt.Printf("Corpus is valid\n")
+
+	return nil
+}

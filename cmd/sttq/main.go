@@ -19,8 +19,8 @@ func main() {
 	case "evaluate":
 		runEvaluate()
 
-	case "import-golos":
-		runImport()
+	case "corpus":
+		runCorpus()
 	}
 }
 func runEvaluate() {
@@ -53,6 +53,18 @@ func runEvaluate() {
 	}
 
 }
+func runCorpus() {
+	subcommand := os.Args[2]
+	switch subcommand {
+	case "import-golos":
+		runImport()
+	case "stats":
+		runStats()
+	case "validate":
+		runValidate()
+
+	}
+}
 
 type quotaSlice []string
 
@@ -76,7 +88,7 @@ func runImport() {
 	flags.Var(&quotas, "quota", "Квота")
 
 	fmt.Print(os.Args[1:], "\n")
-	flags.Parse(os.Args[2:])
+	flags.Parse(os.Args[3:])
 	quotaMap := parseQuotas(quotas)
 	fmt.Printf("%v, %v, %v, %v", *archivePath, quotaMap, *seed, *outPath)
 
@@ -85,7 +97,27 @@ func runImport() {
 		log.Fatalf("Ошибка выполнения: %v", err)
 	}
 }
+func runStats() {
+	var manPath = flag.String("manifest", "corpus/manifest.jsonl", "Путь к эталонам")
+	flag.CommandLine.Parse(os.Args[3:])
+	//fmt.Printf("%v\n", *manPath)
 
+	StartStats := app.NewStatsApp(*manPath)
+	if err := StartStats.Run(); err != nil {
+		log.Fatalf("Ошибка выполнения: %v", err)
+	}
+}
+func runValidate() {
+	flags := flag.NewFlagSet("validate", flag.ExitOnError)
+	var manPath = flags.String("manifest", "corpus/manifest.jsonl", "Путь к эталонам")
+	flags.Parse(os.Args[3:])
+	//fmt.Printf("%v\n", *manPath)
+
+	StartValidate := app.NewValidateApp(*manPath)
+	if err := StartValidate.Run(); err != nil {
+		log.Fatalf("Ошибка выполнения: %v", err)
+	}
+}
 func parseQuotas(qs quotaSlice) map[string]int {
 	result := make(map[string]int)
 
