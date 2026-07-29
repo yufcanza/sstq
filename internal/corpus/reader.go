@@ -99,6 +99,9 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 		if err := json.Unmarshal([]byte(line), &raw); err != nil {
 			return nil, fmt.Errorf("Ошибка обработки JSON: %v", err)
 		}
+		if strings.TrimSpace(raw.Text) == "" {
+			continue
+		}
 
 		normalizedPath := filepath.ToSlash(raw.AudioFilePath)
 		hashString := domain + ":" + normalizedPath
