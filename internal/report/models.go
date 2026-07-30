@@ -19,14 +19,17 @@ type Summary struct {
 	MissingResults    int     `json:"missing_results"`
 	Coverage          float64 `json:"coverage"`
 
-	ReferenceWords int     `json:"reference_words"`
-	Hits           int     `json:"hits"`
-	Substitutions  int     `json:"substitutions"`
-	Deletions      int     `json:"deletions"`
-	Insertions     int     `jsоn:"insertions"`
-	WER            float64 `json:"wer"`
-	CER            float64 `json:"cer"`
-	ExactMatches   int     `json:"exact_matches"`
+	ReferenceWords   int     `json:"reference_words"`
+	Hits             int     `json:"hits"`
+	Substitutions    int     `json:"substitutions"`
+	Deletions        int     `json:"deletions"`
+	Insertions       int     `json:"insertions"`
+	WER              float64 `json:"wer"`
+	// SubstitutionsCER int     `json:"substitutions_cer"`
+	// DeletionsCER     int     `json:"deletions_cer"`
+	// InsertionsCER    int     `json:"insertions_cer"`
+	CER              float64 `json:"cer"`
+	ExactMatches     int     `json:"exact_matches"`
 
 	AudioDurationMS   int64   `json:"audio_duration_ms"`
 	RecognitionTimeMS int64   `json:"recognition_time_ms"`
@@ -38,16 +41,17 @@ type Groups struct {
 }
 
 type GroupStats struct {
-	Samples         int     `json:"samples"`
-	Hits            int     `json:"hits"`
-	Substitutions   int     `json:"substitutions"`
-	Deletions       int     `json:"deletions"`
-	Insertions      int     `json:"insertions"`
-	WER             float64 `json:"wer"`
-	CER             float64 `json:"cer"`
-	ExactMatches    int     `json:"exact_matches"`
-	AudioDurationMS int64   `json:"audio_duration_ms"`
-	RTF             float64 `json:"rtf"`
+	Samples           int     `json:"samples"`
+	Hits              int     `json:"hits"`
+	Substitutions     int     `json:"substitutions"`
+	Deletions         int     `json:"deletions"`
+	Insertions        int     `json:"insertions"`
+	WER               float64 `json:"wer"`
+	CER               float64 `json:"cer"`
+	ExactMatches      int     `json:"exact_matches"`
+	AudioDurationMS   int64   `json:"audio_duration_ms"`
+	RecognitionTimeMS int64   `json:"recognition_time_ms"`
+	RTF               float64 `json:"rtf"`
 }
 type RecordEntry struct {
 	ID                  string                  `json:"id"`

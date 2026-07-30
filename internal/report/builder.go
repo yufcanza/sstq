@@ -11,8 +11,21 @@ func NewBuilder() *Builder {
 	return &Builder{}
 }
 
-func (b *Builder) Build(results []corpus.Result, errors []ErrorEntry) Report {
-	if len(results) == 0 {
+func (b *Builder) Build(results []corpus.Result) Report {
+	var successful []corpus.Result
+	var errors []ErrorEntry
+	for _, res := range results {
+		if res.Error != "" {
+			errors = append(errors, ErrorEntry{
+				ID:      res.ID,
+				Code:    "no hypothesis",
+				Message: res.Error,
+			})
+		} else {
+			successful = append(successful, res)
+		}
+	}
+	if len(successful) == 0 {
 		return Report{
 			FormatVersion: FormatVersion,
 			Summary:       Summary{},
@@ -24,9 +37,9 @@ func (b *Builder) Build(results []corpus.Result, errors []ErrorEntry) Report {
 			Errors:  errors,
 		}
 	}
-	records := make([]RecordEntry, len(results))
+	records := make([]RecordEntry, len(successful))
 
-	for i, res := range results {
+	for i, res := range successful {
 		records[i] = RecordEntry{
 			ID:                  res.ID,
 			Reference:           res.Reference,
@@ -46,8 +59,8 @@ func (b *Builder) Build(results []corpus.Result, errors []ErrorEntry) Report {
 		}
 	}
 
-	summary := b.calculateSummary(results, errors)
-	groups := b.calculateGroups(results)
+	summary := b.calculateSummary(successful, errors)
+	groups := b.calculateGroups(successful)
 
 	return Report{
 		FormatVersion: FormatVersion,
@@ -67,6 +80,9 @@ func (b *Builder) calculateSummary(results []corpus.Result, errors []ErrorEntry)
 		totalAudioDuration   int64
 		totalRecognitionTime int64
 	)
+	SubstitutionsCER := 0
+	DeletionsCER := 0
+	InsertionsCER := 0
 	for _, res := range results {
 		if res.Hypothesis != "" {
 			summary.SuccessfulResults++
@@ -76,24 +92,31 @@ func (b *Builder) calculateSummary(results []corpus.Result, errors []ErrorEntry)
 		summary.Substitutions += res.Substitutions
 		summary.Deletions += res.Deletions
 		summary.Insertions += res.Insertions
+		SubstitutionsCER += res.SubstitutionsCER
+		DeletionsCER += res.DeletionsCER
+		InsertionsCER += res.InsertionsCER
 
 		if res.ExactMatch {
 			summary.ExactMatches++
 		}
 		if res.DurationMS > 0 {
 			totalAudioDuration += res.DurationMS
-			totalRecognitionTime += res.DurationMS // пока заглушка
+		}
+		if res.RecognitionTimeMS > 0 {
+			totalRecognitionTime += res.RecognitionTimeMS
 		}
 	}
 	for _, err := range errors {
-		if err.Message != "" {
+		if err.Message == "error" {
 			summary.EngineErrors++
+		} else {
 			summary.MissingResults++
 		}
 	}
 	totalErrors := summary.Substitutions + summary.Deletions + summary.Insertions
+	totalErrorsChar := SubstitutionsCER + DeletionsCER + InsertionsCER
 	if summary.ReferenceWords > 0 {
-		summary.WER = float64(totalErrors) / float64(summary.ReferenceWords)
+		summary.WER = math.Round(float64(totalErrors)/float64(summary.ReferenceWords)*100000) / 100000
 	}
 	totalChars := 0
 
@@ -101,15 +124,15 @@ func (b *Builder) calculateSummary(results []corpus.Result, errors []ErrorEntry)
 		totalChars += len([]rune(res.NormalizedReference))
 	}
 	if totalChars > 0 {
-		summary.CER = float64(totalErrors) / float64(totalChars)
+		summary.CER = math.Round(float64(totalErrorsChar)/float64(totalChars)*100000) / 100000
 	}
 	if summary.TotalRecords > 0 {
-		summary.Coverage = float64(summary.SuccessfulResults) / float64(summary.TotalRecords)
+		summary.Coverage = math.Round(float64(summary.SuccessfulResults)/float64(summary.TotalRecords)*100000) / 100000
 	}
 	summary.AudioDurationMS = totalAudioDuration
 	summary.RecognitionTimeMS = totalRecognitionTime
 	if totalAudioDuration > 0 {
-		summary.RTF = float64(totalRecognitionTime) / float64(totalAudioDuration)
+		summary.RTF = math.Round(float64(totalRecognitionTime)/float64(totalAudioDuration)*100000) / 100000
 	}
 
 	return summary
@@ -118,80 +141,101 @@ func (b *Builder) calculateSummary(results []corpus.Result, errors []ErrorEntry)
 func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 	byTag := make(map[string]GroupStats)
 	byDuration := make(map[string]GroupStats)
+	tagCER := make(map[string]struct {
+		charErrors int
+		charTotal  int
+	})
+	durationCER := make(map[string]struct {
+		charErrors int
+		charTotal  int
+	})
 
 	byDuration["short"] = GroupStats{}
 	byDuration["medium"] = GroupStats{}
-	byDuration["long"] = GroupStats{}
+	byDuration["large"] = GroupStats{}
 	var group string
 	for _, res := range results {
 
 		for _, tag := range res.Tags {
+			cer := tagCER[tag]
 			stats := byTag[tag]
 			stats.Samples++
 			stats.Hits += res.Hits
 			stats.Substitutions += res.Substitutions
 			stats.Deletions += res.Deletions
 			stats.Insertions += res.Insertions
+			cer.charErrors += res.SubstitutionsCER + res.DeletionsCER + res.InsertionsCER
+			cer.charTotal += len([]rune(res.NormalizedReference))
 			if res.ExactMatch {
 				stats.ExactMatches++
 			}
 			if res.DurationMS > 0 {
 				stats.AudioDurationMS += res.DurationMS
 			}
+			if res.RecognitionTimeMS > 0 {
+				stats.RecognitionTimeMS += res.RecognitionTimeMS
+			}
+			tagCER[tag] = cer
 			byTag[tag] = stats
 		}
 
-		if res.ReferenceWords <= 5 {
+		if res.DurationMS <= 3000 {
 			group = "short"
-		} else if res.ReferenceWords <= 15 {
+		} else if res.DurationMS <= 10000 {
 			group = "medium"
 		} else {
 			group = "large"
 		}
 
 		stats := byDuration[group]
+		cer := durationCER[group]
 		stats.Samples++
 		stats.Hits += res.Hits
 		stats.Substitutions += res.Substitutions
 		stats.Deletions += res.Deletions
 		stats.Insertions += res.Insertions
+		cer.charErrors += res.SubstitutionsCER + res.DeletionsCER + res.InsertionsCER
+		cer.charTotal += len([]rune(res.NormalizedReference))
 		if res.ExactMatch {
 			stats.ExactMatches++
 		}
 		if res.DurationMS > 0 {
 			stats.AudioDurationMS += res.DurationMS
 		}
+		if res.RecognitionTimeMS > 0 {
+			stats.RecognitionTimeMS += res.RecognitionTimeMS
+		}
+		durationCER[group] = cer
 		byDuration[group] = stats
 
 	}
 
 	for tag, stats := range byTag {
 		totalErrors := stats.Substitutions + stats.Deletions + stats.Insertions
-		totalWords, totalChars := 0, 0
+		totalWords := 0
 		for _, res := range results {
 			for _, t := range res.Tags {
 				if t == tag {
 					totalWords += res.ReferenceWords
-					totalChars += len([]rune(res.NormalizedReference))
 					break
 				}
 			}
 		}
 		if totalWords > 0 {
-			stats.WER = float64(totalErrors) / float64(totalWords)
+			stats.WER = math.Round(float64(totalErrors)/float64(totalWords)*100000) / 100000
 		}
-		if totalChars > 0 {
-			stats.WER = float64(totalErrors) / float64(totalChars)
+		if cer, ok := tagCER[tag]; ok && cer.charTotal > 0 {
+			stats.CER = math.Round(float64(cer.charErrors)/float64(cer.charTotal)*100000) / 100000
 		}
 
 		if stats.AudioDurationMS > 0 {
-			stats.RTF = 1.0 // пока заглушка
+			stats.RTF = math.Round(float64(stats.RecognitionTimeMS)/float64(stats.AudioDurationMS)*100000) / 100000
 		}
 		byTag[tag] = stats
 
 		for group, stats := range byDuration {
 			totalErrors := stats.Substitutions + stats.Deletions + stats.Insertions
-			totalWords, totalChars := 0, 0
+			totalWords := 0
 			for _, res := range results {
 				var g string
 				if res.ReferenceWords <= 5 {
@@ -199,21 +243,20 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 				} else if res.ReferenceWords <= 15 {
 					g = "medium"
 				} else {
-					g = "long"
+					g = "large"
 				}
 				if g == group {
 					totalWords += res.ReferenceWords
-					totalChars += len([]rune(res.NormalizedReference))
 				}
 			}
 			if totalWords > 0 {
-				stats.WER = float64(totalErrors) / float64(totalWords)
+				stats.WER = math.Round(float64(totalErrors)/float64(totalWords)*100000) / 100000
 			}
-			if totalChars > 0 {
-				stats.CER = float64(totalErrors) / float64(totalChars)
+			if cer, ok := tagCER[tag]; ok && cer.charTotal > 0 {
+				stats.CER = math.Round(float64(cer.charErrors)/float64(cer.charTotal)*100000) / 100000
 			}
-			if stats.AudioDurationMS > 0 {
-				stats.RTF = 1.0
+			if stats.AudioDurationMS > 0 && stats.RecognitionTimeMS > 0 {
+				stats.RTF = math.Round(float64(stats.RecognitionTimeMS)/float64(stats.AudioDurationMS)*100000) / 100000
 			}
 			byDuration[group] = stats
 		}

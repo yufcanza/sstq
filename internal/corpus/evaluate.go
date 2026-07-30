@@ -16,6 +16,13 @@ func Evaluate(manif []Manifest, hyps []Hypothesis, normalizer *normalize.Normali
 	for _, man := range manif {
 		hyp, exists := hypMap[man.ID]
 		if !exists {
+			results = append(results, Result{
+				ID:         man.ID,
+				Error:      "no hypothesis found",
+				Tags:       man.Tags,
+				DurationMS: man.DurationMS,
+				Reference:  man.Text,
+			})
 			continue
 		}
 		//fmt.Printf(" Profile: %v", a.normProfile)
@@ -41,11 +48,16 @@ func Evaluate(manif []Manifest, hyps []Hypothesis, normalizer *normalize.Normali
 			Deletions:           werResult.D,
 			Insertions:          werResult.I,
 			WER:                 werResult.Value,
+			SubstitutionsCER:    cerResult.S,
+			DeletionsCER:        cerResult.D,
+			InsertionsCER:       cerResult.I,
 			CER:                 cerResult.Value,
 			ExactMatch:          normalizedRef == normalizedHyp,
 			DurationMS:          man.DurationMS,
+			RecognitionTimeMS:   hyp.RecognitionTimeMS,
 			Tags:                man.Tags,
 			Alignment:           alignment.Items,
+			Error: "",
 		}
 		results = append(results, result)
 

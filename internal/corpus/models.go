@@ -12,8 +12,9 @@ type Manifest struct {
 	DurationMS int64    `json:"duration_ms,omitempty"`
 }
 type Hypothesis struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
+	ID                string `json:"id"`
+	Text              string `json:"text"`
+	RecognitionTimeMS int64  `json:"recognition_time"`
 }
 type GolosRecord struct {
 	AudioFilePath string  `json:"audio_filepath"`
@@ -51,18 +52,17 @@ type ImportConfig struct {
 type ImportSummary struct {
 	SourceRecords    int            `json:"source_records"`
 	SelectedRecord   int            `json:"selected_records"`
-	SelectedDuration int64            `json:"selected_duration_ms"`
+	SelectedDuration int64          `json:"selected_duration_ms"`
 	ByTag            map[string]int `json:"by_tag"`
 	Skipped          map[string]int `json:"skipped"`
 }
 type SelectionInfo struct {
-	Source string `json:"source"`
-	Seed string `json:"string"`
-	RequestRecords int `json:"request_records"`
-	MaxDuration int64 `json:"max_duration_ms"`
-	Quotas map[string]int `json:"quotas"`
-	SelectedIDs []string `json:"selected_ids"`
-
+	Source         string         `json:"source"`
+	Seed           string         `json:"string"`
+	RequestRecords int            `json:"request_records"`
+	MaxDuration    int64          `json:"max_duration_ms"`
+	Quotas         map[string]int `json:"quotas"`
+	SelectedIDs    []string       `json:"selected_ids"`
 }
 type Result struct {
 	ID                  string   `json:"id"`
@@ -76,6 +76,9 @@ type Result struct {
 	Deletions           int      `json:"deletions"`
 	Insertions          int      `json:"insertions"`
 	WER                 float64  `json:"wer"`
+	SubstitutionsCER    int      `json:"substitutions_cer"`
+	DeletionsCER        int      `json:"deletions_cer"`
+	InsertionsCER       int      `json:"insertions_cer"`
 	CER                 float64  `json:"cer"`
 	ExactMatch          bool     `json:"exact_match"`
 	Tags                []string `json:"tags,omitempty"`
@@ -83,4 +86,5 @@ type Result struct {
 	RecognitionTimeMS   int64    `json:"recognition_time_ms,omitempty"`
 
 	Alignment []metrics.AlignmentItem `json:"alignment"`
+	Error     string                  `json:"error,omitempty"`
 }

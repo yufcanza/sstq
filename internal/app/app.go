@@ -42,7 +42,7 @@ func (a *EvalApp) Run() error {
 	result := corpus.Evaluate(manifests, hypotheses, a.normalizer)
 
 	builder := report.NewBuilder()
-	reportData := builder.Build(result, nil)
+	reportData := builder.Build(result)
 
 	if a.outPath != "" {
 		if err := report.Write(a.outPath, reportData); err != nil {

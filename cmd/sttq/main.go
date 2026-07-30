@@ -24,15 +24,15 @@ func main() {
 	}
 }
 func runEvaluate() {
-	//flags := flag.NewFlagSet(command, flag.ExitOnError)
+	flags := flag.NewFlagSet("evaluate", flag.ExitOnError)
 	var (
-		manPath = flag.String("manifest", "corpus/manifest.jsonl", "Путь к файлу с эталонами")
-		hypPath = flag.String("hypotheses", "run.jsonl", "Путь к файлу с гипотезами")
-		norm    = flag.String("normalization", "ru-default", "Профиль нормализации")
-		outPath = flag.String("out", "report.json", "Выход")
+		manPath = flags.String("manifest", "corpus/manifest.jsonl", "Путь к файлу с эталонами")
+		hypPath = flags.String("hypotheses", "run.jsonl", "Путь к файлу с гипотезами")
+		norm    = flags.String("normalization", "ru-default", "Профиль нормализации")
+		outPath = flags.String("out", "report.json", "Выход")
 	)
 	//fmt.Print(os.Args[1:], "\n")
-	flag.CommandLine.Parse(os.Args[2:])
+	flags.Parse(os.Args[2:])
 	//fmt.Printf("%v, %v, %v, %v", *manPath, *hypPath, *norm, *outPath)
 	if *manPath == "" {
 		log.Fatal("Не указан файл эталонов")
@@ -79,14 +79,13 @@ func (q *quotaSlice) String() string {
 func runImport() {
 	flags := flag.NewFlagSet("import-golos", flag.ExitOnError)
 	var (
-		archivePath = flag.String("archive", "test.tar", "Путь к архиву")
+		archivePath = flags.String("archive", "test.tar", "Путь к архиву")
 		//quota       = flag.String("quota", "crowd=200,farfield=50", "Квоты")
-		seed    = flag.String("seed", "intership-2026", "Сид")
-		outPath = flag.String("out", "corpus", "Вывод")
+		seed    = flags.String("seed", "intership-2026", "Сид")
+		outPath = flags.String("out", "corpus", "Вывод")
 	)
 	var quotas quotaSlice
 	flags.Var(&quotas, "quota", "Квота")
-
 	fmt.Print(os.Args[1:], "\n")
 	flags.Parse(os.Args[3:])
 	quotaMap := parseQuotas(quotas)
@@ -98,8 +97,9 @@ func runImport() {
 	}
 }
 func runStats() {
-	var manPath = flag.String("manifest", "corpus/manifest.jsonl", "Путь к эталонам")
-	flag.CommandLine.Parse(os.Args[3:])
+	flags := flag.NewFlagSet("stats", flag.ExitOnError)
+	var manPath = flags.String("manifest", "corpus/manifest.jsonl", "Путь к эталонам")
+	flags.Parse(os.Args[3:])
 	//fmt.Printf("%v\n", *manPath)
 
 	StartStats := app.NewStatsApp(*manPath)
