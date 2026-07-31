@@ -2,6 +2,7 @@ package report
 
 import (
 	"math"
+	"sort"
 	"sttq/internal/corpus"
 )
 
@@ -37,6 +38,14 @@ func (b *Builder) Build(results []corpus.Result) Report {
 			Errors:  errors,
 		}
 	}
+
+	sort.Slice(successful, func(i, j int) bool {
+		return successful[i].ID < successful[j].ID
+	})
+	sort.Slice(errors, func(i, j int) bool {
+		return errors[i].ID < errors[j].ID
+	})
+
 	records := make([]RecordEntry, len(successful))
 
 	for i, res := range successful {

@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/json"
 	"math"
 	"sttq/internal/corpus"
 	"testing"
@@ -78,6 +79,44 @@ func TestGroupByTag(t *testing.T) {
 	}
 }
 
+func TestGroupByDuration(t *testing.T) {
+    results := []corpus.Result{
+        {
+            ID:             "1",
+            DurationMS:     2000,
+            ReferenceWords: 3,
+            Substitutions:  1,
+            WER:            1.0 / 3.0,
+        },
+        {
+            ID:             "2",
+            DurationMS:     5000,
+            ReferenceWords: 10,
+            Substitutions:  2,
+            WER:            2.0 / 10.0,
+        },
+        {
+            ID:             "3",
+            DurationMS:     15000, 
+            ReferenceWords: 20,
+            Substitutions:  5,
+            WER:            5.0 / 20.0,
+        },
+    }
+
+    builder := NewBuilder()
+    reportData := builder.Build(results)
+    if _, ok := reportData.Groups.ByDuration["short"]; !ok {
+        t.Error("группа 'short' не найдена")
+    }
+    if _, ok := reportData.Groups.ByDuration["medium"]; !ok {
+        t.Error("группа 'medium' не найдена")
+    }
+    if _, ok := reportData.Groups.ByDuration["large"]; !ok {
+        t.Error("группа 'large' не найдена")
+    }
+}
+
 func TestCoverage(t *testing.T) {
 	results := []corpus.Result{
 		{ID: "1", Error: "", Hypothesis: "text"},          // успешная
@@ -93,4 +132,39 @@ func TestCoverage(t *testing.T) {
 	if reportData.Summary.Coverage != expectedCoverage {
 		t.Errorf("Coverage = %v, want %v", reportData.Summary.Coverage, expectedCoverage)
 	}
+}
+
+func TestRecordsSorted(t *testing.T) {
+    results := []corpus.Result{
+        {ID: "b-2", Reference: "текст2"},
+        {ID: "a-1", Reference: "текст1"},
+        {ID: "c-3", Reference: "текст3"},
+    }
+
+    builder := NewBuilder()
+    reportData := builder.Build(results)
+
+    expectedIDs := []string{"a-1", "b-2", "c-3"}
+    for i, record := range reportData.Records {
+        if record.ID != expectedIDs[i] {
+            t.Errorf("Records[%d].ID = %v, want %v", i, record.ID, expectedIDs[i])
+        }
+    }
+}
+
+func TestStableJSON(t *testing.T) {
+    results := []corpus.Result{
+        {ID: "1", Reference: "текст", Hypothesis: "текст", WER: 0.0, CER: 0.0},
+    }
+
+    builder := NewBuilder()
+    reportData1 := builder.Build(results)
+    reportData2 := builder.Build(results)
+
+    json1, _ := json.Marshal(reportData1)
+    json2, _ := json.Marshal(reportData2)
+
+    if string(json1) != string(json2) {
+        t.Error("JSON не стабильный — разный при одинаковых данных")
+    }
 }
