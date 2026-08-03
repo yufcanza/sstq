@@ -21,7 +21,10 @@ func main() {
 
 	case "corpus":
 		runCorpus()
+	case "report":
+		runReport()
 	}
+
 }
 func runEvaluate() {
 	flags := flag.NewFlagSet("evaluate", flag.ExitOnError)
@@ -142,4 +145,19 @@ func parseQuotas(qs quotaSlice) map[string]int {
 	}
 
 	return result
+}
+
+func runReport(){
+	flags:=flag.NewFlagSet("report", flag.ExitOnError)
+	var(
+		inputPath = flags.String("input", "report.json", "Путь к json-отчету")
+		format = flags.String("format", "html", "формат вывода: hmtl")
+		outputPath = flags.String("out", "report.html", "Путь вывода отчета")
+	)
+
+	flags.Parse(os.Args[2:])
+	StartReport := app.NewReportApp(*inputPath, *format, *outputPath)
+	if err := StartReport.Run(); err != nil{
+		log.Fatalf("Ошибка: %v", err)
+	}
 }

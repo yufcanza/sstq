@@ -126,3 +126,27 @@ func (a *ValidateApp) Run() error {
 
 	return nil
 }
+type ReportApp struct {
+	inputPath string
+	format string
+	outputPath string
+}
+
+func NewReportApp(inputPath, format, outputPath string) *ReportApp{
+	return &ReportApp{
+		inputPath: inputPath,
+		format: format,
+		outputPath: outputPath,
+	}
+}
+
+func (a *ReportApp) Run() error {
+	switch a.format{
+	case "html":
+		return report.WriteHTML(a.inputPath, a.outputPath)
+
+	default:
+		return fmt.Errorf("Ошибка формата: формат %s не поддрживается", a.format)
+	}
+}
+
