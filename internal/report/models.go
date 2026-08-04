@@ -19,17 +19,17 @@ type Summary struct {
 	MissingResults    int     `json:"missing_results"`
 	Coverage          float64 `json:"coverage"`
 
-	ReferenceWords   int     `json:"reference_words"`
-	Hits             int     `json:"hits"`
-	Substitutions    int     `json:"substitutions"`
-	Deletions        int     `json:"deletions"`
-	Insertions       int     `json:"insertions"`
-	WER              float64 `json:"wer"`
+	ReferenceWords int     `json:"reference_words"`
+	Hits           int     `json:"hits"`
+	Substitutions  int     `json:"substitutions"`
+	Deletions      int     `json:"deletions"`
+	Insertions     int     `json:"insertions"`
+	WER            float64 `json:"wer"`
 	// SubstitutionsCER int     `json:"substitutions_cer"`
 	// DeletionsCER     int     `json:"deletions_cer"`
 	// InsertionsCER    int     `json:"insertions_cer"`
-	CER              float64 `json:"cer"`
-	ExactMatches     int     `json:"exact_matches"`
+	CER          float64 `json:"cer"`
+	ExactMatches int     `json:"exact_matches"`
 
 	AudioDurationMS   int64   `json:"audio_duration_ms"`
 	RecognitionTimeMS int64   `json:"recognition_time_ms"`
@@ -75,4 +75,45 @@ type ErrorEntry struct {
 	ID      string `json:"id,omitempty"`
 	Code    string `json:"code"`
 	Message string `json:"message"`
+}
+
+type CompareResult struct {
+	BaselinePath string                `json:"baseline"`
+	CurrentPath  string                `json:"current"`
+	Summary      CompareSummary        `json:"summary"`
+	ByTag        map[string]CompareTag `json:"by_tag"`
+	Record       []CompareRecord       `json:"records"`
+	Status       string                `json:"status"`
+}
+
+type CompareSummary struct {
+	BaselineWER      float64 `json:"baseline_wer"`
+	CurrentWER       float64 `json:"current_wer"`
+	WERdelta         float64 `json:"wer_delta"`
+	MaxWERdelta      float64 `json:"max_wer_delta"`
+	BaselineCER      float64 `json:"baseline_cer"`
+	CurrentCER       float64 `json:"current_cer"`
+	CERdelta         float64 `json:"cer_delta"`
+	MaxCERdelta      float64 `json:"max_cer_delta"`
+	BaselineCoverage float64 `json:"baseline_coverage"`
+	CurrentCoverage  float64 `json:"current_coverage"`
+	CoverageDelta    float64 `json:"coverage_delta"`
+	Status           string  `json:"status"`
+}
+
+type CompareTag struct {
+	BaselineWER float64 `json:"baseline_wer"`
+	CurrentWER  float64 `json:"current_wer"`
+	WERdelta    float64 `json:"wer_delta"`
+}
+
+type CompareRecord struct {
+	ID          string  `json:"id"`
+	Status      string  `json:"status"`
+	BaselineWER float64 `json:"baseline_wer,omitempty"`
+	CurrentWER  float64 `json:"current_wer,omitempty"`
+	WERdelta    float64 `json:"wer_delta,omitempty"`
+	BaselineCER float64 `json:"baseline_cer,omitempty"`
+	CurrentCER  float64 `json:"current_cer,omitempty"`
+	CERdelta    float64 `json:"cer_delta,omitempty"`
 }

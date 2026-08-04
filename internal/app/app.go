@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"sttq/internal/corpus"
 	"sttq/internal/normalize"
 	"sttq/internal/report"
@@ -126,22 +127,23 @@ func (a *ValidateApp) Run() error {
 
 	return nil
 }
+
 type ReportApp struct {
-	inputPath string
-	format string
+	inputPath  string
+	format     string
 	outputPath string
 }
 
-func NewReportApp(inputPath, format, outputPath string) *ReportApp{
+func NewReportApp(inputPath, format, outputPath string) *ReportApp {
 	return &ReportApp{
-		inputPath: inputPath,
-		format: format,
+		inputPath:  inputPath,
+		format:     format,
 		outputPath: outputPath,
 	}
 }
 
 func (a *ReportApp) Run() error {
-	switch a.format{
+	switch a.format {
 	case "html":
 		return report.WriteHTML(a.inputPath, a.outputPath)
 
@@ -150,3 +152,43 @@ func (a *ReportApp) Run() error {
 	}
 }
 
+type CompareApp struct {
+	baselinePath string
+	currentPath  string
+	maxWER       float64
+	maxCER       float64
+}
+
+func NewCompareApp(baselinePath, currentPath string, maxWER, maxCER float64) *CompareApp {
+	return &CompareApp{
+		baselinePath: baselinePath,
+		currentPath:  currentPath,
+		maxWER:       maxWER,
+		maxCER:       maxCER,
+	}
+}
+
+func (a *CompareApp) Run() int {
+	result, err := report.Compare(a.baselinePath, a.currentPath, a.maxWER, a.maxCER)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Ошибка сравнения: %v\n", err)
+		return 2
+	}
+	fmt.Printf("Baseline WER:	 	%.4f\n", result.Summary.BaselineWER)
+	fmt.Printf("Current WER:	 	%.4f\n", result.Summary.CurrentWER)
+	fmt.Printf("Delta:			%.4f\n", result.Summary.WERdelta)
+	fmt.Printf("Allowed:		%.4f\n", result.Summary.MaxWERdelta)
+	fmt.Println()
+	fmt.Printf("Baseline CER: 		%.4f\n", result.Summary.BaselineCER)
+	fmt.Printf("Current CER: 		%.4f\n", result.Summary.CurrentCER)
+	fmt.Printf("Delta:			%.4f\n", result.Summary.CERdelta)
+	fmt.Printf("Allowed: 		%.4f\n", result.Summary.MaxCERdelta)
+	fmt.Println()
+	fmt.Printf("Status: %s\n", result.Status)
+
+	if result.Status == "PASS" {
+		return 0
+	}
+	return 1
+
+}

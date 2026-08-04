@@ -18,11 +18,12 @@ func main() {
 	switch command {
 	case "evaluate":
 		runEvaluate()
-
 	case "corpus":
 		runCorpus()
 	case "report":
 		runReport()
+	case "compare":
+		runCompare()
 	}
 
 }
@@ -147,17 +148,31 @@ func parseQuotas(qs quotaSlice) map[string]int {
 	return result
 }
 
-func runReport(){
-	flags:=flag.NewFlagSet("report", flag.ExitOnError)
-	var(
-		inputPath = flags.String("input", "report.json", "Путь к json-отчету")
-		format = flags.String("format", "html", "формат вывода: hmtl")
+func runReport() {
+	flags := flag.NewFlagSet("report", flag.ExitOnError)
+	var (
+		inputPath  = flags.String("input", "report.json", "Путь к json-отчету")
+		format     = flags.String("format", "html", "формат вывода: hmtl")
 		outputPath = flags.String("out", "report.html", "Путь вывода отчета")
 	)
 
 	flags.Parse(os.Args[2:])
 	StartReport := app.NewReportApp(*inputPath, *format, *outputPath)
-	if err := StartReport.Run(); err != nil{
+	if err := StartReport.Run(); err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
+}
+
+func runCompare() {
+	flags := flag.NewFlagSet("compare", flag.ExitOnError)
+	var (
+		baseline = flags.String("baseline", "./reports/baseline.json", "Путь к baseline")
+		current  = flag.String("current", "./reports/current.json", "Путь к current")
+		maxWER   = flags.Float64("max-wer-delta", 0.02, "Максимальный порог WER")
+		maxCER   = flags.Float64("max-cer-delta", 0.02, "Максимальный порог CER")
+	)
+	flags.Parse(os.Args[2:])
+	StartCompare := app.NewCompareApp(*baseline, *current, *maxWER, *maxCER)
+	exitCode := StartCompare.Run()
+	os.Exit(exitCode)
 }

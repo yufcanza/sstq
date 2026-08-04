@@ -1,0 +1,119 @@
+package report
+
+import (
+	"encoding/json"
+	"fmt"
+	"math"
+	"os"
+)
+
+func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64) (*CompareResult, error) {
+	baseline, err := ReadReport(baselinePath)
+	if err != nil {
+		return nil, fmt.Errorf("Ошибка чтения baseline: %w", err)
+	}
+	current, err := ReadReport(currentPath)
+	if err != nil {
+		return nil, fmt.Errorf("Ошибка чтения current: %w", err)
+	}
+
+	baselineMap := make(map[string]RecordEntry)
+	for _, r := range baseline.Records {
+		baselineMap[r.ID] = r
+	}
+	currentMap := make(map[string]RecordEntry)
+	for _, r := range current.Records {
+		currentMap[r.ID] = r
+	}
+
+	result := &CompareResult{
+		BaselinePath: baselinePath,
+		CurrentPath:  currentPath,
+		ByTag:        make(map[string]CompareTag),
+	}
+
+	result.Summary = CompareSummary{
+		BaselineWER:      baseline.Summary.WER,
+		CurrentWER:       current.Summary.WER,
+		WERdelta:         current.Summary.WER - baseline.Summary.WER,
+		MaxWERdelta:      maxWERdelta,
+		BaselineCER:      baseline.Summary.CER,
+		CurrentCER:       current.Summary.CER,
+		CERdelta:         current.Summary.CER - baseline.Summary.CER,
+		MaxCERdelta:      maxCERdelta,
+		BaselineCoverage: baseline.Summary.Coverage,
+		CurrentCoverage:  current.Summary.Coverage,
+		CoverageDelta:    current.Summary.Coverage - baseline.Summary.Coverage,
+	}
+	for tag, baselineStats := range baseline.Groups.ByTag {
+		currentStats := current.Groups.ByTag[tag]
+		result.ByTag[tag] = CompareTag{
+			BaselineWER: baselineStats.WER,
+			CurrentWER:  currentStats.WER,
+			WERdelta:    currentStats.WER - baselineStats.WER,
+		}
+	}
+	var records []CompareRecord
+
+	for id, currentRec := range currentMap {
+		baselineRec, exist := baselineMap[id]
+		if !exist {
+			records = append(records, CompareRecord{
+				ID:         id,
+				Status:     "new",
+				CurrentWER: currentRec.WER,
+				CurrentCER: currentRec.CER,
+			})
+			continue
+		}
+		werDelta := currentRec.WER - baselineRec.WER
+		cerDelta := currentRec.CER - baselineRec.CER
+
+		status := "unchanged"
+		if werDelta < -0.01 {
+			status = "improved"
+		} else if werDelta > 0.01 {
+			status = "degraded"
+		}
+
+		records = append(records, CompareRecord{
+			ID:          id,
+			Status:      status,
+			BaselineWER: baselineRec.WER,
+			CurrentWER:  currentRec.WER,
+			WERdelta:    werDelta,
+			BaselineCER: baselineRec.CER,
+			CurrentCER:  currentRec.CER,
+			CERdelta:    cerDelta,
+		})
+	}
+	for id := range baselineMap {
+		if _, exists := currentMap[id]; !exists {
+			records = append(records, CompareRecord{
+				ID:          id,
+				Status:      "missing",
+				BaselineWER: baselineMap[id].WER,
+			})
+		}
+	}
+
+	result.Record = records
+
+	if math.Abs(result.Summary.WERdelta) <= maxWERdelta && math.Abs(result.Summary.CERdelta) <= maxCERdelta {
+		result.Status = "PASS"
+	} else {
+		result.Status = "FAIL"
+	}
+	return result, nil
+
+}
+
+func ReadReport(path string) (Report, error) {
+	var report Report
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return report, err
+	}
+	err = json.Unmarshal(data, &report)
+	return report, err
+}
