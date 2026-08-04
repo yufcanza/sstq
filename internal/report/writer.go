@@ -34,8 +34,8 @@ func WriteHTML(jsonPath, htmlPath string) error {
 	}
 
 	t, err := template.New("report").Funcs(template.FuncMap{
-		"mul": func(a, b float64) float64 {
-			return a * b
+		"percent": func(v float64) string {
+			return fmt.Sprintf("%.1f%%", v*100)
 		},
 	}).Parse(tmpl)
 	if err != nil {
