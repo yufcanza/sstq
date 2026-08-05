@@ -2,5 +2,7 @@
 *.json
 *jsonl
 reports/
-golden/
+!testdata/golden
+!testdata/golden/**/*.json
+!testdata/golden/**/*.jsonl
 test.tar

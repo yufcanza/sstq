@@ -1,0 +1,58 @@
+{
+ "baseline": "..\\..\\testdata\\golden\\baseline.json",
+ "current": "..\\..\\testdata\\golden\\expected_report.json",
+ "summary": {
+  "baseline_wer": 0.41176,
+  "current_wer": 0.41176,
+  "wer_delta": 0,
+  "max_wer_delta": 0.02,
+  "baseline_cer": 0.29921,
+  "current_cer": 0.29921,
+  "cer_delta": 0,
+  "max_cer_delta": 0.02,
+  "baseline_coverage": 0.02,
+  "current_coverage": 0.02,
+  "coverage_delta": 0,
+  "status": ""
+ },
+ "by_tag": {
+  "crowd": {
+   "baseline_wer": 0.41176,
+   "current_wer": 0.41176,
+   "wer_delta": 0
+  }
+ },
+ "records": [
+  {
+   "id": "crowd-03d3463f64c9",
+   "status": "unchanged",
+   "baseline_wer": 1,
+   "current_wer": 1,
+   "baseline_cer": 0.5,
+   "current_cer": 0.5
+  },
+  {
+   "id": "crowd-045c08bb1a4f",
+   "status": "unchanged"
+  },
+  {
+   "id": "crowd-06576284734e",
+   "status": "unchanged"
+  },
+  {
+   "id": "crowd-06d80a76a92b",
+   "status": "unchanged",
+   "baseline_wer": 0.666667,
+   "current_wer": 0.666667,
+   "baseline_cer": 0.555556,
+   "current_cer": 0.555556
+  },
+  {
+   "id": "crowd-01bd82d2a9b5",
+   "status": "unchanged"
+  }
+ ],
+ "new_errors": null,
+ "fixed_errors": null,
+ "status": "PASS"
+}

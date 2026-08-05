@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>STTQ-отчет</title>
+        <style>
+            body {font-family: monospace; background-color: #fafafa; padding: auto;}
+            h1, h2 {color: #2c2b2b;}
+            table { width: 100%; border-collapse: collapse; margin: 10px 0;}
+            th { background: #e0e0e0; text-align: left; padding: auto; }
+            td { padding: auto; border-bottom: 1px solid #ddd; }
+            .worst { background: #fff3cd; }
+            .record { border: 1px solid #ddd; padding: auto; margin: 15px 0; border-radius: 5px; background: white; }
+            .card { background: white; padding: auto; border-radius: 5px; margin-bottom: 15px; border: 1px solid #ddd; }
+            .match { color: green; }
+            .mismatch { color: red; }
+            .texts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+            .metrics { display: flex; gap: 15px; flex-wrap: wrap; font-size: 14px; }
+            .badge { display: inline-block; padding: auto; border-radius: 12px; font-size: 12px; margin: 2px; }
+            .equal { background: #d4edda; }
+            .substitute { background: #fff3cd; }
+            .delete { background: #f8d7da; }
+            .insert { background: #d1ecf1; }
+        </style>
+    </head>
+    <body>
+        <h1>STTQ Отчет</h1>
+
+        <div class="card">
+            <h2>Общая сводка</h2>
+            <p><b>Записей: </b>250</p>
+            <p><b>Успешных: </b>5</p>
+            <p><b>Coverage: </b>2.0%</p>
+            <p><b>WER: </b>0.41176</p>
+            <p><b>CER: </b>0.29921</p>
+            <p><b>RTF: </b>1.60522</p>
+            <p><b>Точных совпадений: </b>3</p>
+        </div>
+        <div class="card">
+            <h2>По тегам</h2>
+            
+            <p><b>crowd:</b> samples = 5, WER = 0.411760, CER= 0.299210</p>
+            
+        </div>
+         <div class="card">
+            <h2>По длительности</h2>
+            
+            <p><b>large: </b>samples = 0, WER = 0.000000, CER= 0.299210</p>
+            
+            <p><b>medium: </b>samples = 2, WER = 0.666670, CER= 0.299210</p>
+            
+            <p><b>short: </b>samples = 3, WER = 0.125000, CER= 0.299210</p>
+            
+        </div>
+        <div class="card">
+            <h2>Ошибки</h2>
+            
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-06e32c8581e9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-07fc7cb75644)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-0ac563fd27b4)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-0e402eeb21fb)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-10256e17802f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1237d8678d79)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-12ecf369787c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-131253e8f3e2)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-134300811b0f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-16b2bb2851e3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1861cb3bced6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-192d737cc861)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-193c893ce18b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1942e140aeb9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-19b3cfc2b01b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1a307e80b501)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1b54d77076c7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1ca9a922330b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-1dd9282c084a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-20509109bdf7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-210f8572ac47)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-2407f962a812)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-248d72c38206)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-261e89beb6f9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-26ac1abc185a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-2abff568d5e7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-2e2419b87b38)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-2f33115ea57d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-30cd74da06b9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3275c004310e)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-33a9f03bee41)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-343df06dba5f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-36c0abce1a87)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-36f6acac2826)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-37650a2c6976)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-37872e000557)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3790011f816b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-386ec47530e0)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3bb26d8ad38f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3c2e048a29fc)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3dafccd707d6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3dcfbd92eafb)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-3f1cadb2a85f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-40d8a0685019)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-443817f3fa18)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-4716215a0510)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-47bcf256b9f5)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-492bc98fce10)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-4a69c45811a3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-4ceb30f096ea)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-4f706ab1b3a7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-501d789c6892)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-5172958d9484)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-53068a7a0bd8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-54cb544ddfd9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-55cb91f7d87e)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-56948c1a1e27)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-57557316cf88)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-58a3d3fcd87c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-597805479ef8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-5d88563bd325)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-602d4e3b14a7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-60392cf6d113)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-627c4d87effd)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-62a6f2cdff01)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-634787bfa935)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-648be46d9211)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-64fc598628c3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-650e9e7825a2)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-658976ba654d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-68a6aa2bbd0a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-70872deb67d4)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-76454eaa7824)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-76469ad4a95f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-768736e470aa)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7a66e7fd292d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7c3c7fe23e35)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7c53a9f1aea3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7f13ce95e612)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7f1e2394afd5)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7ff6a5a5b6f3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-7ff7250d83f0)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-81cdcec79026)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-82506a607028)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-82fd22ff0ef8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-831a85088386)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8462f4dd086b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8704056eaf37)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-881be8babe75)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-886fb4b2cf5d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8935f15384c6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8e63a1513837)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8e78f496b998)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8e9d2f96b4a0)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8eaa95283c04)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-8f7d3400a3c5)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-911415b3fa67)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-919d278dbce7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-935dcb03079e)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9379425b6f24)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-958ec665323b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-95f7e13dbb7a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-99affdd5a027)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-99b07f9b9c97)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-99bf36de27c3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9b2dde0cbe1f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9b83a5400ee5)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9b8be72e9564)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9c0f34d316d5)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9c31e4cb2f43)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9e62ea0fbaa9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-9f2ebfcdf3b0)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a2d08c1eb790)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a3e2476cf252)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a4875ff5ca6a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a54ff8c08a5a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a5bdd7668396)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a62178abc2a1)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a675ea48b52b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a699f72b3b7c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a6f29cd9228b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a781c214f941)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a7f6063f7bad)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a88b4f6dcfa1)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-a9c6ab4be1e6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-abab096d1dd4)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ac5399716ddd)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ac809b2f5fe3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ad699e21a159)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b04f54f2a1bd)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b45f509d80a8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b46dcf7ebfaa)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b5099f808aac)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b6118b8cf2cc)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b97906abcc59)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-b9f07471c349)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-bbf1c526444c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-bc7946405f50)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-bd081914d09d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-c25811fa288f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-c4804fe85aad)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-c533b3659ae7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-c76fc00fe7fc)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-c9cfef0bd4ab)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-cc8d11e7c261)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-cd04c7a1cdd7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ce0046bb3910)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ce27de6a1fdc)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d000c22185da)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d0bf4ef0425a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d16ef53063a4)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d1b5a87d11a3)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d31fb239ff0f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d433f82d9dee)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d453a15a7e26)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d5589a01bac8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d78fa0df51db)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d7ab2203939b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d7ff0b8cf056)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-d8fd02b2c689)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-daea99ff000a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-db4f0ffb7f34)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-dc7060e05c0d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-dcf9589e12de)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-debe08c68654)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-df0236a8dc84)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e0be4e58decc)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e203a8beff51)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e4e5bafe6e23)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e5352a885f47)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e5dc5aaeade6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e7c5e2d1d287)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e8bf8e41b8e6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-e992e3650605)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ea6b7407b4b6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ea6f31e0cbf8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ead8c43c98c8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ec9dc5343a2d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ecc1d6844de8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ed0d2803f45f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-f3cb307f17fe)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-f590ac238334)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-f838f3b080f7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fb04eea39072)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fb1f948c9efd)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fb7c6126d4fb)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fb8d46e120f2)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fc0b4289e088)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fc880fb691cf)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fcca38095b1f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fe17b044d63f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-fe333165640b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-febb011cf245)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-febd277f2169)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: crowd-ff77c3d6d2a1)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-034cf4c108e2)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-0d184d798855)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-0d3db5c76cd7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-1841b40bb35c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-1b068957fb16)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-20d0d628686a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-271b12271bcd)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-36292b2cae73)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-3889cdc254c6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-3b06925b199c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-3ea4c2dce6ee)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-40986559a723)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-41750abfeda7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-421937a912e7)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-436a20542c1b)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-4a8cf01c9549)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-621547a9779e)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-662e6c016d20)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-6878d030cc7d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-6930ff18fd04)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-6c7f88f5c176)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-6da8fe692468)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-787e618ba7da)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-7b91ae82d56d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-7f5f55632685)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-8549bfa1265f)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-8c65c45fad11)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-92480036791e)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-9260708b5ef0)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-a4296d4e3d03)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-a9a2c0eb8a3a)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-b0248a031e93)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-b6d1d02704c1)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-c0cee24a5859)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-c86ee7a0f86c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-ca8680e59b4c)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-cbbc16627624)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-d11856ff72c0)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-d48660a288f8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-d71a8f0180a5)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-d943b29a8ef8)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-de0cea72e41d)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-de59e2474be6)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-df6b2c6dacc9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-e209a5457ba9)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-ee469e391af1)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-f2717d105781)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-fc5b6a717a39)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-fd8e8a9e4253)</p>
+        </div>
+        
+            <p><b>no hypothesis: </b>no hypothesis found (ID: farfield-ffe1b412ed37)</p>
+        </div>
+        
+        <div class="card">
+            <h2>Худшие результаты</h2>
+            <table>
+                <tr><th>ID</th><th>WER</th><th>CER</th><th>Слова</th></tr>
+                
+                
+                <tr class="worst">
+                    <td>crowd-01bd82d2a9b5</td>
+                    <td>0.0000</td>
+                    <td>0.0000</td>
+                    <td>5</td>
+                </tr>
+                
+                
+                
+                <tr class="worst">
+                    <td>crowd-03d3463f64c9</td>
+                    <td>1.0000</td>
+                    <td>0.5000</td>
+                    <td>1</td>
+                </tr>
+                
+                
+                
+                <tr class="worst">
+                    <td>crowd-045c08bb1a4f</td>
+                    <td>0.0000</td>
+                    <td>0.0000</td>
+                    <td>1</td>
+                </tr>
+                
+                
+                
+                <tr class="worst">
+                    <td>crowd-06576284734e</td>
+                    <td>0.0000</td>
+                    <td>0.0000</td>
+                    <td>1</td>
+                </tr>
+                
+                
+                
+                <tr class="worst">
+                    <td>crowd-06d80a76a92b</td>
+                    <td>0.6667</td>
+                    <td>0.5556</td>
+                    <td>9</td>
+                </tr>
+                
+                
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2>Результаты</h2>
+            
+            <div class="record">
+                <p><b>crowd-01bd82d2a9b5:</b><span class="match">
+                    Совпадение
+                </span></p>
+                <div class="texts">
+                    <div><b>Эталон:</b>бойтесь ходячих мертвецов эпизод один</div>
+                    <div><b>Гипотеза:</b>бойтесь ходячих мертвецов эпизод один</div>
+                </div>
+                <div class="metrics">
+                    <span>WER: 0.0000</span>
+                    <span>CER: 0.0000</span>
+                    <span>Совпало: 5</span>
+                    <span>Замен: 0</span>
+                    <span>Удалений: 0</span>
+                    <span>Вставок: 0</span>
+                    <span>Теги: crowd</span>
+                </div>
+                
+                <div class="alignment">
+                    
+                    <span class="badge equal">
+                        бойтесь->бойтесь
+                    </span>
+                    
+                    <span class="badge equal">
+                        ходячих->ходячих
+                    </span>
+                    
+                    <span class="badge equal">
+                        мертвецов->мертвецов
+                    </span>
+                    
+                    <span class="badge equal">
+                        эпизод->эпизод
+                    </span>
+                    
+                    <span class="badge equal">
+                        один->один
+                    </span>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+            <div class="record">
+                <p><b>crowd-03d3463f64c9:</b><span class="mismatch">
+                    Ошибка
+                </span></p>
+                <div class="texts">
+                    <div><b>Эталон:</b>зрение</div>
+                    <div><b>Гипотеза:</b>зреть</div>
+                </div>
+                <div class="metrics">
+                    <span>WER: 1.0000</span>
+                    <span>CER: 0.5000</span>
+                    <span>Совпало: 0</span>
+                    <span>Замен: 1</span>
+                    <span>Удалений: 0</span>
+                    <span>Вставок: 0</span>
+                    <span>Теги: crowd</span>
+                </div>
+                
+                <div class="alignment">
+                    
+                    <span class="badge substitute">
+                        зрение->зреть
+                    </span>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+            <div class="record">
+                <p><b>crowd-045c08bb1a4f:</b><span class="match">
+                    Совпадение
+                </span></p>
+                <div class="texts">
+                    <div><b>Эталон:</b>нефтегорска</div>
+                    <div><b>Гипотеза:</b>нефтегорска</div>
+                </div>
+                <div class="metrics">
+                    <span>WER: 0.0000</span>
+                    <span>CER: 0.0000</span>
+                    <span>Совпало: 1</span>
+                    <span>Замен: 0</span>
+                    <span>Удалений: 0</span>
+                    <span>Вставок: 0</span>
+                    <span>Теги: crowd</span>
+                </div>
+                
+                <div class="alignment">
+                    
+                    <span class="badge equal">
+                        нефтегорска->нефтегорска
+                    </span>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+            <div class="record">
+                <p><b>crowd-06576284734e:</b><span class="match">
+                    Совпадение
+                </span></p>
+                <div class="texts">
+                    <div><b>Эталон:</b>арзуманяну</div>
+                    <div><b>Гипотеза:</b>арзуманяну</div>
+                </div>
+                <div class="metrics">
+                    <span>WER: 0.0000</span>
+                    <span>CER: 0.0000</span>
+                    <span>Совпало: 1</span>
+                    <span>Замен: 0</span>
+                    <span>Удалений: 0</span>
+                    <span>Вставок: 0</span>
+                    <span>Теги: crowd</span>
+                </div>
+                
+                <div class="alignment">
+                    
+                    <span class="badge equal">
+                        арзуманяну->арзуманяну
+                    </span>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+            <div class="record">
+                <p><b>crowd-06d80a76a92b:</b><span class="mismatch">
+                    Ошибка
+                </span></p>
+                <div class="texts">
+                    <div><b>Эталон:</b>будет ли различие температуры воздуха на разных пляжах таиланда</div>
+                    <div><b>Гипотеза:</b>будет ли различие между гипотезой и эталоном</div>
+                </div>
+                <div class="metrics">
+                    <span>WER: 0.6667</span>
+                    <span>CER: 0.5556</span>
+                    <span>Совпало: 3</span>
+                    <span>Замен: 4</span>
+                    <span>Удалений: 2</span>
+                    <span>Вставок: 0</span>
+                    <span>Теги: crowd</span>
+                </div>
+                
+                <div class="alignment">
+                    
+                    <span class="badge equal">
+                        будет->будет
+                    </span>
+                    
+                    <span class="badge equal">
+                        ли->ли
+                    </span>
+                    
+                    <span class="badge equal">
+                        различие->различие
+                    </span>
+                    
+                    <span class="badge delete">
+                        температуры->
+                    </span>
+                    
+                    <span class="badge delete">
+                        воздуха->
+                    </span>
+                    
+                    <span class="badge substitute">
+                        на->между
+                    </span>
+                    
+                    <span class="badge substitute">
+                        разных->гипотезой
+                    </span>
+                    
+                    <span class="badge substitute">
+                        пляжах->и
+                    </span>
+                    
+                    <span class="badge substitute">
+                        таиланда->эталоном
+                    </span>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </body>
+</html>
