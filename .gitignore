@@ -1,7 +1,6 @@
 *.exe
 *.json
 *jsonl
-corpus/
 reports/
 golden/
 test.tar
