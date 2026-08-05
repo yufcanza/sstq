@@ -83,6 +83,8 @@ type CompareResult struct {
 	Summary      CompareSummary        `json:"summary"`
 	ByTag        map[string]CompareTag `json:"by_tag"`
 	Record       []CompareRecord       `json:"records"`
+	NewErrors    []ErrorEntry          `json:"new_errors"`
+	FixedErrors  []ErrorEntry          `json:"fixed_errors"`
 	Status       string                `json:"status"`
 }
 

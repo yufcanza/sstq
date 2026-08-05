@@ -25,6 +25,14 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 	for _, r := range current.Records {
 		currentMap[r.ID] = r
 	}
+	baselineErrors :=make(map[string]ErrorEntry)
+	for _, r :=range baseline.Errors{
+		baselineErrors[r.ID] = r
+	}
+	currentErrors :=make(map[string]ErrorEntry)
+	for _, r :=range current.Errors{
+		currentErrors[r.ID] = r
+	}
 
 	result := &CompareResult{
 		BaselinePath: baselinePath,
@@ -97,7 +105,22 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 		}
 	}
 
+	var newErrors, fixedErrors []ErrorEntry
+
+	for id, err :=range currentErrors{
+		if _, exists :=baselineErrors[id]; !exists{
+			newErrors = append(newErrors, err)
+		}
+	}
+	for id, err :=range baselineErrors{
+		if _, exists :=currentErrors[id]; !exists{
+			fixedErrors = append(fixedErrors, err)
+		}
+	}
+
 	result.Record = records
+	result.NewErrors = newErrors
+	result.FixedErrors = fixedErrors
 
 	if math.Abs(result.Summary.WERdelta) <= maxWERdelta && math.Abs(result.Summary.CERdelta) <= maxCERdelta {
 		result.Status = "PASS"

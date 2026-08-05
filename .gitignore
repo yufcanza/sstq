@@ -1,0 +1,6 @@
+*.exe
+*.json
+*jsonl
+corpus/
+reports/
+test.tar
