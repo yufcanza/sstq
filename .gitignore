@@ -6,3 +6,9 @@ reports/
 !testdata/golden/**/*.json
 !testdata/golden/**/*.jsonl
 test.tar
+*.bin
+*.py
+*.sh
+*.cmd
+*.dll
+*txt
