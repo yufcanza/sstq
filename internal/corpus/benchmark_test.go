@@ -78,6 +78,22 @@ func createBenchmarkHypotheses(b *testing.B, count int) string {
 }
 
 func BenchmarkParseManifest(b *testing.B) {
-	
+	data := createBenchmarkData(10000)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		parseManifest(data, "crowd", "test-seed")
+	}
 }
-func createBenchmarkData(count int)
+
+func createBenchmarkData(count int) []byte {
+	var lines []string
+	for i := 0; i < count; i++ {
+		line := `{"id":` + string(rune(i)) + `"audio":"files/` + string(rune(i)) + `.wav","text":"текст","duration_ms":2.5}`
+		lines = append(lines, line)
+	}
+	result := ""
+	for _, l := range lines {
+		result += l + "\n"
+	}
+	return []byte(result)
+}

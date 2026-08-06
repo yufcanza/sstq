@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 )
 
 func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64) (*CompareResult, error) {
@@ -25,12 +26,12 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 	for _, r := range current.Records {
 		currentMap[r.ID] = r
 	}
-	baselineErrors :=make(map[string]ErrorEntry)
-	for _, r :=range baseline.Errors{
+	baselineErrors := make(map[string]ErrorEntry)
+	for _, r := range baseline.Errors {
 		baselineErrors[r.ID] = r
 	}
-	currentErrors :=make(map[string]ErrorEntry)
-	for _, r :=range current.Errors{
+	currentErrors := make(map[string]ErrorEntry)
+	for _, r := range current.Errors {
 		currentErrors[r.ID] = r
 	}
 
@@ -107,13 +108,13 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 
 	var newErrors, fixedErrors []ErrorEntry
 
-	for id, err :=range currentErrors{
-		if _, exists :=baselineErrors[id]; !exists{
+	for id, err := range currentErrors {
+		if _, exists := baselineErrors[id]; !exists {
 			newErrors = append(newErrors, err)
 		}
 	}
-	for id, err :=range baselineErrors{
-		if _, exists :=currentErrors[id]; !exists{
+	for id, err := range baselineErrors {
+		if _, exists := currentErrors[id]; !exists {
 			fixedErrors = append(fixedErrors, err)
 		}
 	}
@@ -121,6 +122,18 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 	result.Record = records
 	result.NewErrors = newErrors
 	result.FixedErrors = fixedErrors
+
+	sort.Slice(result.Record, func(i, j int) bool {
+		return result.Record[i].ID < result.Record[j].ID
+	})
+
+	sort.Slice(result.NewErrors, func(i, j int) bool {
+		return result.NewErrors[i].ID < result.NewErrors[j].ID
+	})
+
+	sort.Slice(result.FixedErrors, func(i, j int) bool {
+		return result.FixedErrors[i].ID < result.FixedErrors[j].ID
+	})
 
 	if math.Abs(result.Summary.WERdelta) <= maxWERdelta && math.Abs(result.Summary.CERdelta) <= maxCERdelta {
 		result.Status = "PASS"

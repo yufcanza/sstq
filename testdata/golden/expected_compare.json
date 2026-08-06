@@ -24,6 +24,10 @@
  },
  "records": [
   {
+   "id": "crowd-01bd82d2a9b5",
+   "status": "unchanged"
+  },
+  {
    "id": "crowd-03d3463f64c9",
    "status": "unchanged",
    "baseline_wer": 1,
@@ -46,10 +50,6 @@
    "current_wer": 0.666667,
    "baseline_cer": 0.555556,
    "current_cer": 0.555556
-  },
-  {
-   "id": "crowd-01bd82d2a9b5",
-   "status": "unchanged"
   }
  ],
  "new_errors": null,

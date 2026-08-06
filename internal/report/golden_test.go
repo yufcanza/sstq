@@ -150,4 +150,7 @@ func TestGoldenCompare(t *testing.T) {
 		t.Logf(" got len: %d, want len: %d", len(got), len(want))
 	}
 
+	t.Logf("got: %s", string(got[:200]))
+	t.Logf("want: %s", string(want[:200]))
+
 }
