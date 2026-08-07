@@ -35,14 +35,14 @@
       }
     },
     "by_duration": {
-      "large": {
+      "long": {
         "samples": 0,
         "hits": 0,
         "substitutions": 0,
         "deletions": 0,
         "insertions": 0,
         "wer": 0,
-        "cer": 0.29921,
+        "cer": 0,
         "exact_matches": 0,
         "audio_duration_ms": 0,
         "recognition_time_ms": 0,
@@ -54,8 +54,8 @@
         "substitutions": 4,
         "deletions": 2,
         "insertions": 0,
-        "wer": 0.66667,
-        "cer": 0.29921,
+        "wer": 0.42857,
+        "cer": 0.35,
         "exact_matches": 1,
         "audio_duration_ms": 7305,
         "recognition_time_ms": 13380,
@@ -67,8 +67,8 @@
         "substitutions": 1,
         "deletions": 0,
         "insertions": 0,
-        "wer": 0.125,
-        "cer": 0.29921,
+        "wer": 0.33333,
+        "cer": 0.11111,
         "exact_matches": 2,
         "audio_duration_ms": 7260,
         "recognition_time_ms": 10000,

@@ -112,8 +112,8 @@ func TestGroupByDuration(t *testing.T) {
     if _, ok := reportData.Groups.ByDuration["medium"]; !ok {
         t.Error("группа 'medium' не найдена")
     }
-    if _, ok := reportData.Groups.ByDuration["large"]; !ok {
-        t.Error("группа 'large' не найдена")
+    if _, ok := reportData.Groups.ByDuration["long"]; !ok {
+        t.Error("группа 'long' не найдена")
     }
 }
 

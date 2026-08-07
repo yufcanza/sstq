@@ -88,8 +88,8 @@ func TestGoldenHTML(t *testing.T) {
 	if err := Write(tmpJson, reportData); err != nil {
 		t.Fatalf("Ошибка записи отчета: %v", err)
 	}
-	t.Logf("jsonPath: %s", tmpJson)
-	t.Logf("htmlPath: %s", out)
+	//t.Logf("jsonPath: %s", tmpJson)
+	//t.Logf("htmlPath: %s", out)
 
 	if err := WriteHTML(tmpJson, out); err != nil {
 		t.Fatalf("Ошибка записи отчета: %v", err)
@@ -120,10 +120,11 @@ func TestGoldenHTML(t *testing.T) {
 }
 
 func TestGoldenCompare(t *testing.T) {
+
 	baselinePath := filepath.Join("..", "..", "testdata", "golden", "baseline.json")
 	currentPath := filepath.Join("..", "..", "testdata", "golden", "expected_report.json")
 
-	result, err := Compare(baselinePath, currentPath, 0.02, 0.02)
+	result, err, _ := Compare(baselinePath, currentPath, 0.02, 0.02)
 	if err != nil {
 		t.Fatalf("Ошибка сравнения: %v", err)
 	}
@@ -147,10 +148,10 @@ func TestGoldenCompare(t *testing.T) {
 
 	if !bytes.Equal(got, want) {
 		t.Errorf("golden compare mismatch")
-		t.Logf(" got len: %d, want len: %d", len(got), len(want))
+		//t.Logf(" got len: %d, want len: %d", len(got), len(want))
 	}
 
-	t.Logf("got: %s", string(got[:200]))
-	t.Logf("want: %s", string(want[:200]))
+	//t.Logf("got: %s", string(got[:200]))
+	//t.Logf("want: %s", string(want[:200]))
 
 }

@@ -169,10 +169,10 @@ func NewCompareApp(baselinePath, currentPath string, maxWER, maxCER float64) *Co
 }
 
 func (a *CompareApp) Run() int {
-	result, err := report.Compare(a.baselinePath, a.currentPath, a.maxWER, a.maxCER)
+	result, err, errcode := report.Compare(a.baselinePath, a.currentPath, a.maxWER, a.maxCER)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Ошибка сравнения: %v\n", err)
-		return 2
+		return errcode
 	}
 	fmt.Printf("Baseline WER:	 	%.4f\n", result.Summary.BaselineWER)
 	fmt.Printf("Current WER:	 	%.4f\n", result.Summary.CurrentWER)
@@ -249,9 +249,6 @@ func (a *CompareApp) Run() int {
 		println()
 	}
 
-	if result.Status == "PASS" {
-		return 0
-	}
-	return 1
+	return errcode
 
 }

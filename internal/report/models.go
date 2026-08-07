@@ -78,8 +78,8 @@ type ErrorEntry struct {
 }
 
 type CompareResult struct {
-	BaselinePath string                `json:"baseline"`
-	CurrentPath  string                `json:"current"`
+	BaselinePath string                `json:"-"`
+	CurrentPath  string                `json:"-"`
 	Summary      CompareSummary        `json:"summary"`
 	ByTag        map[string]CompareTag `json:"by_tag"`
 	Record       []CompareRecord       `json:"records"`

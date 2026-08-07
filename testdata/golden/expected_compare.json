@@ -1,6 +1,4 @@
 {
- "baseline": "..\\..\\testdata\\golden\\baseline.json",
- "current": "..\\..\\testdata\\golden\\expected_report.json",
  "summary": {
   "baseline_wer": 0.41176,
   "current_wer": 0.41176,

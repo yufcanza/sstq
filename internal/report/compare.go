@@ -3,19 +3,18 @@ package report
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"sort"
 )
 
-func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64) (*CompareResult, error) {
+func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64) (*CompareResult, error, int) {
 	baseline, err := ReadReport(baselinePath)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка чтения baseline: %w", err)
+		return nil, fmt.Errorf("Ошибка чтения baseline: %w", err), 2
 	}
 	current, err := ReadReport(currentPath)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка чтения current: %w", err)
+		return nil, fmt.Errorf("Ошибка чтения current: %w", err), 2
 	}
 
 	baselineMap := make(map[string]RecordEntry)
@@ -135,13 +134,13 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 		return result.FixedErrors[i].ID < result.FixedErrors[j].ID
 	})
 
-	if math.Abs(result.Summary.WERdelta) <= maxWERdelta && math.Abs(result.Summary.CERdelta) <= maxCERdelta {
+	if result.Summary.WERdelta <= maxWERdelta && result.Summary.CERdelta <= maxCERdelta {
 		result.Status = "PASS"
+		return result, nil, 1
 	} else {
 		result.Status = "FAIL"
+		return result, nil, 0
 	}
-	return result, nil
-
 }
 
 func ReadReport(path string) (Report, error) {

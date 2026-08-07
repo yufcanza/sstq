@@ -161,7 +161,7 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 
 	byDuration["short"] = GroupStats{}
 	byDuration["medium"] = GroupStats{}
-	byDuration["large"] = GroupStats{}
+	byDuration["long"] = GroupStats{}
 	var group string
 	for _, res := range results {
 
@@ -188,12 +188,13 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 			byTag[tag] = stats
 		}
 
+
 		if res.DurationMS <= 3000 {
 			group = "short"
 		} else if res.DurationMS <= 10000 {
 			group = "medium"
 		} else {
-			group = "large"
+			group = "long"
 		}
 
 		stats := byDuration[group]
@@ -241,15 +242,15 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 			stats.RTF = math.Round(float64(stats.RecognitionTimeMS)/float64(stats.AudioDurationMS)*100000) / 100000
 		}
 		byTag[tag] = stats
-
-		for group, stats := range byDuration {
+	}
+	for group, stats := range byDuration {
 			totalErrors := stats.Substitutions + stats.Deletions + stats.Insertions
 			totalWords := 0
 			for _, res := range results {
 				var g string
-				if res.ReferenceWords <= 5 {
+				if res.DurationMS <= 3000 {
 					g = "short"
-				} else if res.ReferenceWords <= 15 {
+				} else if res.DurationMS <= 10000 {
 					g = "medium"
 				} else {
 					g = "large"
@@ -261,7 +262,7 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 			if totalWords > 0 {
 				stats.WER = math.Round(float64(totalErrors)/float64(totalWords)*100000) / 100000
 			}
-			if cer, ok := tagCER[tag]; ok && cer.charTotal > 0 {
+			if cer, ok := durationCER[group]; ok && cer.charTotal > 0 {
 				stats.CER = math.Round(float64(cer.charErrors)/float64(cer.charTotal)*100000) / 100000
 			}
 			if stats.AudioDurationMS > 0 && stats.RecognitionTimeMS > 0 {
@@ -269,7 +270,6 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 			}
 			byDuration[group] = stats
 		}
-	}
 	return Groups{
 		ByTag:      byTag,
 		ByDuration: byDuration,
