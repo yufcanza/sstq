@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sttq/internal/app"
+	"time"
 )
 
 func main() {
@@ -24,6 +25,8 @@ func main() {
 		runReport()
 	case "compare":
 		runCompare()
+	case "audio":
+		runAudioPrepare()
 	}
 
 }
@@ -175,4 +178,22 @@ func runCompare() {
 	StartCompare := app.NewCompareApp(*baseline, *current, *maxWER, *maxCER)
 	exitCode := StartCompare.Run()
 	os.Exit(exitCode)
+}
+
+func runAudioPrepare() {
+	flags := flag.NewFlagSet("audio-prepate", flag.ExitOnError)
+	var (
+		manifestPath = flags.String("manifest", "./source/manifest.jsonl", "путь к манифесту")
+		profile      = flags.String("profile", "wav-16k", "профиль: wav-16-k или wav-8-k")
+		workers      = flags.Int("workers", 4, "количество воркеров")
+		timeout      = flags.Int("timeout", 30, "Таймаут на запись (в секундах)")
+		outDir       = flags.String("out", "./corpus", "выхоодная директория")
+	)
+	flags.Parse(os.Args[3:])
+
+	timeoutS := time.Duration(*timeout) * time.Second
+	StartPrepare := app.NewAudioPrepateApp(*manifestPath, *profile, *workers, timeoutS, *outDir)
+	if err := StartPrepare.Run(); err != nil {
+		log.Fatalf("Ошибка: %v", err)
+	}
 }

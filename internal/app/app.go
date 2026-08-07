@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"os"
+	"sttq/internal/audio"
 	"sttq/internal/corpus"
 	"sttq/internal/normalize"
 	"sttq/internal/report"
@@ -251,4 +252,48 @@ func (a *CompareApp) Run() int {
 
 	return errcode
 
+}
+
+type AudioPrepateApp struct {
+	manifestPath string
+	profile      string
+	workers      int
+	timeout      time.Duration
+	outDir       string
+}
+
+func NewAudioPrepateApp(manifestPath, profile string, workers int, timeout time.Duration, outDir string) *AudioPrepateApp {
+	return &AudioPrepateApp{
+		manifestPath: manifestPath,
+		profile:      profile,
+		workers:      workers,
+		timeout:      timeout,
+		outDir:       outDir,
+	}
+}
+func (a *AudioPrepateApp) Run() error {
+	config := audio.PrepareConfig{
+		ManifestPath: a.manifestPath,
+		Profile:      a.profile,
+		Workers:      a.workers,
+		Timeout:      a.timeout,
+		OutDir:       a.outDir,
+	}
+	results, err := audio.Prepare(config)
+	if err != nil {
+		fmt.Printf("Ошибка: %v", err)
+	}
+	ok, skipped, errCount := 0, 0, 0
+	for _, r := range results {
+		switch r.Status {
+		case "ok":
+			ok++
+		case "skipped":
+			skipped++
+		case "error":
+			errCount++
+		}
+	}
+	fmt.Printf("\nГотово: %d, пропущено: %d, ошибок: %d", ok, skipped, errCount)
+	return nil
 }

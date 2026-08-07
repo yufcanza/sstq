@@ -12,3 +12,4 @@ test.tar
 *.cmd
 *.dll
 *txt
+/corpus
