@@ -253,7 +253,7 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 				} else if res.DurationMS <= 10000 {
 					g = "medium"
 				} else {
-					g = "large"
+					g = "long"
 				}
 				if g == group {
 					totalWords += res.ReferenceWords

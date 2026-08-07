@@ -8,5 +8,8 @@ build:
 test: 
 	go test -v ./...
 
+golden:
+	go test ./internal/report/... -update
+
 bench:
 	go test ./... -bench=. -benchmem -benchtime=1x
