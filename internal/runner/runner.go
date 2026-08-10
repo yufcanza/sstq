@@ -12,11 +12,11 @@ type Task struct {
 	Timeout time.Duration
 }
 type Result struct {
-	ID string `json:"id"`
-	Hypothesis string `json:"hypothesis"`
-	Error string `json:"error,omitempty"`
+	ID              string        `json:"id"`
+	Hypothesis      string        `json:"text"`
+	Error           string        `json:"error,omitempty"`
 	RecognitionTime time.Duration `json:"recognition-time-ms"`
-	Status string `json:"status"`
+	Status          string        `json:"status"`
 }
 
 type Runner interface {

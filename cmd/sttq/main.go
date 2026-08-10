@@ -27,6 +27,8 @@ func main() {
 		runCompare()
 	case "audio":
 		runAudioPrepare()
+	case "run":
+		runRun()
 	}
 
 }
@@ -194,6 +196,25 @@ func runAudioPrepare() {
 	timeoutS := time.Duration(*timeout) * time.Second
 	StartPrepare := app.NewAudioPrepateApp(*manifestPath, *profile, *workers, timeoutS, *outDir)
 	if err := StartPrepare.Run(); err != nil {
+		log.Fatalf("Ошибка: %v", err)
+	}
+}
+func runRun() {
+	flags := flag.NewFlagSet("run", flag.ExitOnError)
+	var (
+		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
+		binaryPath   = flags.String("binary", "bin/whisper-cli.exe", "путь к whisper-cli")
+		modelPath    = flags.String("model", "./models/ggml-tiny.bin", "путь к модели")
+		language     = flags.String("language", "ru", "язык")
+		workers      = flags.Int("workers", 2, "количество воркеров")
+		timeout      = flags.Int("timeout", 30, "таймаут на одну запись")
+		resume       = flags.Bool("resume", false, "возобновить прогон")
+		outputPath   = flags.String("out", "./runs/whisper.jsonl", "путь для результатов")
+	)
+	flags.Parse(os.Args[3:])
+	timeoutS := time.Duration(*timeout) * time.Second
+	StartRun := app.NewRunApp(*manifestPath, *binaryPath, *modelPath, *language, *workers, timeoutS, *resume, *outputPath)
+	if err := StartRun.Run(); err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
 }

@@ -1,12 +1,15 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sttq/internal/audio"
 	"sttq/internal/corpus"
 	"sttq/internal/normalize"
 	"sttq/internal/report"
+	"sttq/internal/runner"
 	"time"
 )
 
@@ -295,5 +298,113 @@ func (a *AudioPrepateApp) Run() error {
 		}
 	}
 	fmt.Printf("\nГотово: %d, пропущено: %d, ошибок: %d", ok, skipped, errCount)
+	return nil
+}
+
+type RunApp struct {
+	manifestPath string
+	binaryPath   string
+	modelPath    string
+	language     string
+	workers      int
+	timeout      time.Duration
+	resume       bool
+	outputPath   string
+}
+
+func NewRunApp(manifestPath, binaryPath, modelPath, language string, workers int, timeout time.Duration, resume bool, outputPath string) *RunApp {
+	return &RunApp{
+		manifestPath: manifestPath,
+		binaryPath:   binaryPath,
+		modelPath:    modelPath,
+		language:     language,
+		workers:      workers,
+		timeout:      timeout,
+		resume:       resume,
+		outputPath:   outputPath,
+	}
+}
+func (a *RunApp) Run() error {
+
+	records, err := audio.ReadRecords(a.manifestPath)
+	if err != nil {
+		return fmt.Errorf("Ошибка чтения манифеста: %w", err)
+	}
+	resumeMgr, err := runner.NewResumeManager(a.outputPath)
+	if err != nil {
+		return fmt.Errorf("Ошибка создания менеджера возобновления: %w", err)
+	}
+	whisperRunner := runner.NewWhisperRunner(runner.WhisperConfig{
+		BinaryPath: a.binaryPath,
+		ModelPath:  a.modelPath,
+		Language:   a.language,
+		Timeout:    a.timeout,
+	})
+	outputDir := filepath.Dir(a.outputPath)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("Ошибка создания папки %s: %w", outputDir, err)
+	}
+	resultFile, err := os.OpenFile(a.outputPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return fmt.Errorf("Ошибка открытия файлов результатов: %w", err)
+	}
+	defer resultFile.Close()
+	encoder := json.NewEncoder(resultFile)
+	var results []runner.Result
+
+	pool := runner.NewPool(a.workers, whisperRunner)
+	pool.Start()
+
+	done := make(chan bool)
+	go func() {
+		for result := range pool.Results() {
+			results = append(results, result)
+			if err := encoder.Encode(result); err != nil {
+				fmt.Printf("Ошибка записи результата %s: %v\n", result.ID, err)
+			}
+		}
+		done <- true
+	}()
+	totalTasks := 0
+	skipped := 0
+
+	for _, rec := range records {
+		if a.resume && resumeMgr.IsCompleted(rec.ID) {
+			skipped++
+			continue
+		}
+		totalTasks++
+		audioPath := filepath.Join("corpus", rec.Audio)
+
+		pool.Submit(runner.Task{
+			ID:      rec.ID,
+			Audio:   audioPath,
+			Text:    rec.Text,
+			Timeout: a.timeout,
+		})
+	}
+
+	pool.CloseTasks()
+	<-done
+	pool.Stop()
+
+	success := 0
+	errors := 0
+	timeouts := 0
+	for _, r := range results {
+		switch r.Status {
+		case "success":
+			success++
+		case "error":
+			errors++
+		case "timeout":
+			timeouts++
+		}
+	}
+	fmt.Printf("Успешно:  %d\n", success)
+	fmt.Printf("Ошибок:   %d\n", errors)
+	fmt.Printf("Таймаут:  %d\n", timeouts)
+	fmt.Printf("Результаты сохранены в: %s\n", a.outputPath)
+
 	return nil
 }
