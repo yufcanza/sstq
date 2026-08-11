@@ -27,7 +27,7 @@ func TestCompare_FAIL_1(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Ошибка сравнения: %v", err)
 	}
-	if errcode == 1 {
+	if errcode == 0 {
 		t.Errorf("Status = %s, want FAIL", result.Status)
 	}
 	werDelta := math.Round(result.Summary.WERdelta*1000) / 1000
@@ -54,7 +54,7 @@ func TestCompare_PASS_0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Ошибка сравнения: %v", err)
 	}
-	if errcode == 0 {
+	if errcode == 1 {
 		t.Errorf("Status = %s, want PASS", result.Status)
 	}
 	werDelta := math.Round(result.Summary.WERdelta*1000) / 1000
@@ -86,7 +86,7 @@ func TestCompare_PASS_DeltaEqualThreshold(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Ошибка сравнения: %v", err)
 	}
-	if errcode == 0 {
+	if errcode == 1 {
 		t.Errorf("Status = %s, want PASS", result.Status)
 	}
 	werDelta := math.Round(result.Summary.WERdelta*1000) / 1000

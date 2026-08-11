@@ -185,7 +185,7 @@ func runCompare() {
 func runAudioPrepare() {
 	flags := flag.NewFlagSet("audio-prepate", flag.ExitOnError)
 	var (
-		manifestPath = flags.String("manifest", "./source/manifest.jsonl", "путь к манифесту")
+		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
 		profile      = flags.String("profile", "wav-16k", "профиль: wav-16-k или wav-8-k")
 		workers      = flags.Int("workers", 4, "количество воркеров")
 		timeout      = flags.Int("timeout", 30, "Таймаут на запись (в секундах)")

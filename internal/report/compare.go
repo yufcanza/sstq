@@ -136,10 +136,10 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 
 	if result.Summary.WERdelta <= maxWERdelta && result.Summary.CERdelta <= maxCERdelta {
 		result.Status = "PASS"
-		return result, nil, 1
+		return result, nil, 0
 	} else {
 		result.Status = "FAIL"
-		return result, nil, 0
+		return result, nil, 1
 	}
 }
 

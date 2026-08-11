@@ -112,7 +112,7 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 	ctx, cancel := context.WithTimeout(ctx, config.Timeout)
 	defer cancel()
 
-	args := []string{"i", source}
+	args := []string{"-i", source}
 	args = append(args, ffArgs...)
 	args = append(args, tmp)
 
@@ -151,6 +151,16 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 			Error:  err.Error() + string(errOutput),
 		}
 	}
+
+	if err := os.Rename(tmp, destination); err != nil {
+			os.Remove(tmp)
+			return Result{
+				ID: rec.ID,
+				Status: "error",
+				Error: "Ошибка переименования: " + err.Error(),
+			}
+		}
+		
 	return Result{ID: rec.ID, Status: "ok"}
 }
 

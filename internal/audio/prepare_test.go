@@ -16,14 +16,17 @@ func TestPrepare(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		fakeFFmpeg = filepath.Join(tmpDir, "ffmpeg.bat")
 		content = `@echo off
-copy %1 %~4
-exit 0
+setlocal EnableDelayedExpansion
+set "out="
+for %%a in (%*) do set "out=%%~a"
+if not defined out exit /b 1
+echo fake-audio> "!out!"
+exit /b 0
 `
 	} else {
 		fakeFFmpeg = filepath.Join(tmpDir, "ffmpeg")
 		content = `#!/bin/sh
-for arg; do :; done
-cp "$1" "$arg"
+cp "$2" "${@: -1}"
 exit 0
 `
 	}
@@ -64,6 +67,33 @@ exit 0
 	for _, r := range results {
 		if r.Status == "error" {
 			t.Errorf("Ошибка для %s: %s", r.ID, r.Error)
+		}
+		if r.Status != "ok" {
+			t.Errorf("Статус для %s = %s, хотели ok", r.ID, r.Status)
+		}
+	}
+
+	audioDir := filepath.Join(tmpDir, "output", "audio")
+	for i := 1; i <= 2; i++ {
+		expectedFile := filepath.Join(audioDir, "test"+string(rune('0'+i))+".wav")
+		if _, err := os.Stat(expectedFile); os.IsNotExist(err) {
+			t.Errorf("Выходной файл не создан: %s", expectedFile)
+		}
+	}
+	for i := 1; i <= 2; i++ {
+		tmpFile := filepath.Join(audioDir, "test"+string(rune('0'+i))+".wav.tmp")
+		if _, err := os.Stat(tmpFile); err == nil {
+			t.Errorf("Временный файл не удален: %s", tmpFile)
+		}
+	}
+	for i := 1; i <= 2; i++ {
+		expectedFile := filepath.Join(audioDir, "test"+string(rune('0'+i))+".wav")
+		info, err := os.Stat(expectedFile)
+		if err != nil {
+			continue
+		}
+		if info.Size() == 0 {
+			t.Errorf("Выходной файл пустой: %s", expectedFile)
 		}
 	}
 }
