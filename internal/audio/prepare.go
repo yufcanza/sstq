@@ -153,14 +153,14 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 	}
 
 	if err := os.Rename(tmp, destination); err != nil {
-			os.Remove(tmp)
-			return Result{
-				ID: rec.ID,
-				Status: "error",
-				Error: "Ошибка переименования: " + err.Error(),
-			}
+		os.Remove(tmp)
+		return Result{
+			ID:     rec.ID,
+			Status: "error",
+			Error:  "Ошибка переименования: " + err.Error(),
 		}
-		
+	}
+
 	return Result{ID: rec.ID, Status: "ok"}
 }
 

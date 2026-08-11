@@ -2,8 +2,12 @@ package corpus
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -137,6 +141,36 @@ func Validation(path string) (bool, error) {
 			audioPath := filepath.Join(Dir, rec.Audio)
 			if _, err := os.Stat(audioPath); os.IsNotExist(err) {
 				errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q audio file %q не найден", lineNum, rec.ID, rec.Audio))
+			} else {
+				audioInfo, err := Probe(audioPath)
+				if err != nil {
+					errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: ffprobe ошибка: %v", lineNum, rec.ID, err))
+				} else {
+
+					if audioInfo.SampleRate != rec.SampleRate {
+						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: sample_rate mismatch: expected %d, got %d",
+							lineNum, rec.ID, rec.SampleRate, audioInfo.SampleRate))
+					}
+
+					if audioInfo.Channels != rec.Channels {
+						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: channels mismatch: expected %d, got %d",
+							lineNum, rec.ID, rec.Channels, audioInfo.Channels))
+					}
+					if math.Abs(float64(audioInfo.DurationMS))-math.Abs(float64(rec.Duration)) > 100 {
+						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: duration mismatch: expected %dms, got %dms",
+							lineNum, rec.ID, rec.Duration, audioInfo.DurationMS))
+					}
+				}
+
+				if rec.SHA256 != "" {
+					hash, err := SHA256(audioPath)
+					if err != nil {
+						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: ошибка вычисления SHA-256: %v", lineNum, rec.ID, err))
+					} else if hash != rec.SHA256 {
+						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: SHA-256 mismatch: expected %s, got %s",
+							lineNum, rec.ID, rec.SHA256, hash))
+					}
+				}
 			}
 		}
 
@@ -202,4 +236,19 @@ func printIntMap(m map[int]int) {
 		first = false
 	}
 	fmt.Println()
+}
+
+func SHA256(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("открытие файла: %w", err)
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", fmt.Errorf("чтение файла: %w", err)
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }
