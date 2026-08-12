@@ -22,7 +22,7 @@ test:
 	go test -v ./...
 
 golden:
-	go test ./internal/report/golden_test.go -update
+	go test ./internal/report/ -update
 
 bench:
 	go test ./... -bench=. -benchmem -benchtime=1x

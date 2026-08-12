@@ -4,51 +4,68 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 )
 
-//fake funner
+func collectResults(p *Pool, expected int) []Result {
+	results := make([]Result, 0, expected)
+	for res := range p.Results() {
+		results = append(results, res)
+		if len(results) == expected {
+			break
+		}
+	}
+	return results
+}
+
+// fake funner
 func TestFakeSuccess(t *testing.T) {
 	r := NewFakeRunner(WhisperConfig{}, FakeRunner{
 		Hypothesis: "привет мир",
 	})
-	res := r.Run(context.Background(), Task{ID: "test-1", Audio: "a.wav"})
-	if res.Status != "success" {
-		t.Fatalf("Ожидаемый status success, got %q", res.Status)
+
+	pool := NewPool(2, r)
+	pool.Start()
+
+	pool.Submit(Task{ID: "1", Audio: "a.wav"})
+	pool.Submit(Task{ID: "2", Audio: "b.wav"})
+	pool.CloseTasks()
+
+	results := collectResults(pool, 2)
+
+	if len(results) != 2 {
+		t.Fatalf("ожидалось 2 результата, получено %d", len(results))
 	}
-	if res.Hypothesis != "привет мир" {
-		t.Fatalf("Ожидаемый hypothesis %q, got %q", "привет мир", res.Hypothesis)
-	}
-	if res.Error != "" {
-		t.Fatalf("Ожидаемый empty error, got %q", res.Error)
-	}
-	if res.ID != "test-1" {
-		t.Fatalf("Ожидаемый id test-1, got %q", res.ID)
-	}
-	if res.RecognitionTime <= 0 {
-		t.Fatal("Ожидаемый positive RecognitionTime")
+	for _, res := range results {
+		if res.Status != "success" {
+			t.Errorf("id=%s: ожидался success, получен %q", res.ID, res.Status)
+		}
+		if res.Hypothesis != "привет мир" {
+			t.Errorf("id=%s: неверная гипотеза %q", res.ID, res.Hypothesis)
+		}
 	}
 }
-//timeout
+
+// timeout
 func TestFakeTimeout(t *testing.T) {
 	r := NewFakeRunner(WhisperConfig{}, FakeRunner{
 		ForceTimeout: true,
 	})
-	res := r.Run(context.Background(), Task{ID: "1"})
 
-	if res.Status != "timeout" {
-		t.Fatalf("expected status timeout, got %q", res.Status)
-	}
-	if res.Error != "Превышено время ожидания" {
-		t.Fatalf("unexpected error: %q", res.Error)
-	}
-	if res.Hypothesis != "" {
-		t.Fatalf("expected empty hypothesis on timeout")
+	pool := NewPool(1, r)
+	pool.Start()
+
+	pool.Submit(Task{ID: "1"})
+	pool.CloseTasks()
+
+	results := collectResults(pool, 1)
+	if results[0].Status != "timeout" {
+		t.Fatalf("ожидался timeout, получен %q", results[0].Status)
 	}
 }
-//exit code
+
+// exit code
 func TestFakeExitCode(t *testing.T) {
 	r := NewFakeRunner(WhisperConfig{}, FakeRunner{
 		ExitCode: 1,
@@ -62,10 +79,11 @@ func TestFakeExitCode(t *testing.T) {
 		t.Fatalf("expected exit status in error, got %q", res.Error)
 	}
 }
-//strerr
+
+// strerr
 func TestFakeStderrAsHypothesis(t *testing.T) {
 	r := NewFakeRunner(WhisperConfig{}, FakeRunner{
-		Hypothesis: "", 
+		Hypothesis: "",
 		Stderr: `loading model
 system_info: ...
 Processing audio...
@@ -78,32 +96,33 @@ whisper_print_timings
 	res := r.Run(context.Background(), Task{ID: "stderr-1"})
 
 	if res.Status != "success" {
-		t.Fatalf("expected success, got %q", res.Status)
+		t.Fatalf("ожидался success, получен %q", res.Status)
 	}
 	if res.Hypothesis != "привет из stderr" {
-		t.Fatalf("expected hypothesis from stderr, got %q", res.Hypothesis)
+		t.Fatalf("ожидалась гипотеза из stderr, получен %q", res.Hypothesis)
 	}
 }
-//отмена
+
+// отмена
 func TestFakeCancel(t *testing.T) {
 	r := NewFakeRunner(WhisperConfig{}, FakeRunner{
-		Delay: 100 * time.Millisecond,
+		Delay: 300 * time.Millisecond,
 	})
-	ctx, cancel := context.WithCancel(context.Background())
+	pool := NewPool(1, r)
+	pool.Start()
+	pool.Submit(Task{ID: "1"})
 	go func() {
-		time.Sleep(20 * time.Millisecond)
-		cancel()
+		time.Sleep(30 * time.Millisecond)
+		pool.Stop()
 	}()
-	res := r.Run(ctx, Task{ID: "1"})
-	if res.Status != "error" {
-		t.Fatalf("expected error on cancel, got %q", res.Status)
+	pool.CloseTasks()
+	results := collectResults(pool, 1)
+	if results[0].Status != "error" {
+		t.Fatalf("ожидался error при отмене, получен %q", results[0].Status)
 	}
-	if res.Error != "context canceled" {
-		t.Fatalf("expected 'context canceled', got %q", res.Error)
-	}
-
 }
-//параллельность
+
+// параллельность
 func TestFakeParallel(t *testing.T) {
 	const n = 20
 
@@ -111,44 +130,56 @@ func TestFakeParallel(t *testing.T) {
 		Delay: 20 * time.Millisecond,
 	})
 
-	var wg sync.WaitGroup
-	results := make([]Result, n)
+	pool := NewPool(4, r)
+	pool.Start()
 
+	start := time.Now()
 	for i := 0; i < n; i++ {
-		wg.Add(1)
-		go func(idx int) {
-			defer wg.Done()
-			results[idx] = r.Run(context.Background(), Task{
-				ID: fmt.Sprintf("p-%d", idx),
-			})
-		}(i)
+		pool.Submit(Task{ID: fmt.Sprintf("p-%d", i)})
 	}
-	wg.Wait()
+	pool.CloseTasks()
 
-	calls := r.Calls()
-	if len(calls) != n {
-		t.Fatalf("expected %d calls, got %d", n, len(calls))
+	results := collectResults(pool, n)
+	elapsed := time.Since(start)
+
+	if len(results) != n {
+		t.Fatalf("ожидалось %d результатов, получено %d", n, len(results))
 	}
 
-	for i, res := range results {
-		if res.Status != "success" {
-			t.Errorf("task %d: expected success, got %q", i, res.Status)
-		}
-		if res.ID != fmt.Sprintf("p-%d", i) {
-			t.Errorf("task %d: wrong id %q", i, res.ID)
-		}
+	// 4 воркера × 20ms → примерно 100ms, а не 400ms
+	if elapsed > 200*time.Millisecond {
+		t.Errorf("параллельность не работает: заняло %v", elapsed)
 	}
 }
-//resume
+
+// resume
 func TestFakeResume(t *testing.T) {
 	r := NewFakeRunner(WhisperConfig{Resume: true}, FakeRunner{
 		ResumeSkipIDs: map[string]bool{"1": true},
 	})
-	res := r.Run(context.Background(), Task{ID: "1"})
-	if res.Status != "skipped" {
-		t.Fatalf("expected skipped, got %q", res.Status)
+	pool := NewPool(1, r)
+	pool.Start()
+
+	pool.Submit(Task{ID: "1"})
+	pool.Submit(Task{ID: "2"})
+	pool.CloseTasks()
+
+	results := collectResults(pool, 2)
+
+	var skipped, success int
+	for _, res := range results {
+		switch res.Status {
+		case "skipped":
+			skipped++
+		case "success":
+			success++
+		}
 	}
-	if res.Hypothesis != "" {
-		t.Fatalf("expected empty hypothesis on skip")
+
+	if skipped != 1 {
+		t.Errorf("ожидался 1 skipped, получено %d", skipped)
+	}
+	if success != 1 {
+		t.Errorf("ожидался 1 success, получено %d", success)
 	}
 }

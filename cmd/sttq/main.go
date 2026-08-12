@@ -205,7 +205,7 @@ func runAudioPrepare() {
 	flags.Parse(os.Args[3:])
 	timeout, err := time.ParseDuration(*timeoutStr)
 	if err != nil {
-		log.Fatalf("Некорректный --max-duration %x: %v", *&timeoutStr, err)
+		log.Fatalf("Некорректный --max-duration %q: %v", *timeoutStr, err)
 	}
 	StartPrepare := app.NewAudioPrepateApp(*manifestPath, *profile, *workers, timeout, *outDir)
 	if err := StartPrepare.Run(); err != nil {
@@ -227,7 +227,7 @@ func runRun() {
 	flags.Parse(os.Args[3:])
 	timeout, err := time.ParseDuration(*timeoutStr)
 	if err != nil {
-		log.Fatalf("Некорректный --max-duration %x: %v", *&timeoutStr, err)
+		log.Fatalf("Некорректный --max-duration %q: %v", *timeoutStr, err)
 	}
 	StartRun := app.NewRunApp(*manifestPath, *binaryPath, *modelPath, *language, *workers, timeout, *resume, *outputPath)
 	if err := StartRun.Run(); err != nil {
