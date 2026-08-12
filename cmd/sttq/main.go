@@ -11,12 +11,16 @@ import (
 	"time"
 )
 
+var version = "dev"
+
 func main() {
 	if len(os.Args) < 2 {
 		os.Exit(1)
 	}
 	command := os.Args[1]
 	switch command {
+	case "version":
+		printVersion()
 	case "evaluate":
 		runEvaluate()
 	case "corpus":
@@ -31,6 +35,9 @@ func main() {
 		runRun()
 	}
 
+}
+func printVersion() {
+	fmt.Printf("sstq version %s\n", version)
 }
 func runEvaluate() {
 	flags := flag.NewFlagSet("evaluate", flag.ExitOnError)
@@ -90,17 +97,21 @@ func runImport() {
 	var (
 		archivePath = flags.String("archive", "test.tar", "Путь к архиву")
 		//quota       = flag.String("quota", "crowd=200,farfield=50", "Квоты")
-		seed    = flags.String("seed", "intership-2026", "Сид")
-		outPath = flags.String("out", "corpus", "Вывод")
+		seed           = flags.String("seed", "intership-2026", "Сид")
+		limit          = flags.Int("limit", 250, "Максимальное количество записей")
+		maxDurationStr = flags.String("max-duration", "30m", "Максимальная длительность одной записи")
+		outPath        = flags.String("out", "corpus", "Вывод")
 	)
 	var quotas quotaSlice
 	flags.Var(&quotas, "quota", "Квота")
-	fmt.Print(os.Args[1:], "\n")
+	//fmt.Print(os.Args[1:], "\n")
 	flags.Parse(os.Args[3:])
 	quotaMap := parseQuotas(quotas)
-	fmt.Printf("%v, %v, %v, %v", *archivePath, quotaMap, *seed, *outPath)
-
-	StartImport := app.NewImportApp(*archivePath, quotaMap, *seed, *outPath)
+	maxDuration, err := time.ParseDuration(*maxDurationStr)
+	if err != nil {
+		log.Fatalf("Некорректный --max-duration %q: %v", *maxDurationStr, err)
+	}
+	StartImport := app.NewImportApp(*archivePath, quotaMap, *seed, *outPath, *limit, maxDuration)
 	if err := StartImport.Run(); err != nil {
 		log.Fatalf("Ошибка выполнения: %v", err)
 	}
@@ -188,13 +199,15 @@ func runAudioPrepare() {
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
 		profile      = flags.String("profile", "wav-16k", "профиль: wav-16-k или wav-8-k")
 		workers      = flags.Int("workers", 4, "количество воркеров")
-		timeout      = flags.Int("timeout", 30, "Таймаут на запись (в секундах)")
+		timeoutStr   = flags.String("timeout", "30s", "Таймаут на запись (в секундах)")
 		outDir       = flags.String("out", "./corpus", "выхоодная директория")
 	)
 	flags.Parse(os.Args[3:])
-
-	timeoutS := time.Duration(*timeout) * time.Second
-	StartPrepare := app.NewAudioPrepateApp(*manifestPath, *profile, *workers, timeoutS, *outDir)
+	timeout, err := time.ParseDuration(*timeoutStr)
+	if err != nil {
+		log.Fatalf("Некорректный --max-duration %x: %v", *&timeoutStr, err)
+	}
+	StartPrepare := app.NewAudioPrepateApp(*manifestPath, *profile, *workers, timeout, *outDir)
 	if err := StartPrepare.Run(); err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
@@ -207,13 +220,16 @@ func runRun() {
 		modelPath    = flags.String("model", "./models/ggml-tiny.bin", "путь к модели")
 		language     = flags.String("language", "ru", "язык")
 		workers      = flags.Int("workers", 2, "количество воркеров")
-		timeout      = flags.Int("timeout", 30, "таймаут на одну запись")
+		timeoutStr   = flags.String("timeout", "30s", "таймаут на одну запись")
 		resume       = flags.Bool("resume", false, "возобновить прогон")
 		outputPath   = flags.String("out", "./runs/whisper.jsonl", "путь для результатов")
 	)
 	flags.Parse(os.Args[3:])
-	timeoutS := time.Duration(*timeout) * time.Second
-	StartRun := app.NewRunApp(*manifestPath, *binaryPath, *modelPath, *language, *workers, timeoutS, *resume, *outputPath)
+	timeout, err := time.ParseDuration(*timeoutStr)
+	if err != nil {
+		log.Fatalf("Некорректный --max-duration %x: %v", *&timeoutStr, err)
+	}
+	StartRun := app.NewRunApp(*manifestPath, *binaryPath, *modelPath, *language, *workers, timeout, *resume, *outputPath)
 	if err := StartRun.Run(); err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}

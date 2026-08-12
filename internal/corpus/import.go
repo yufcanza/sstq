@@ -54,7 +54,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	var selected_ids []string
 
 	for _, rec := range selected {
-		
+
 		if config.MaxDuration > 0 && time.Duration(rec.Duration*float64(time.Second)) > config.MaxDuration {
 			continue
 		}

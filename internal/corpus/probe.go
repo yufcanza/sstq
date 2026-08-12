@@ -15,9 +15,9 @@ type AudioInfo struct {
 
 func Probe(filePath string) (*AudioInfo, error) {
 	cmd := exec.Command("ffprobe",
-		"v", "quiet",
+		"-v", "quiet",
 		"-print_format", "json",
-		"-show-streams", filePath)
+		"-show_streams", filePath)
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("ffprobe: %w", err)

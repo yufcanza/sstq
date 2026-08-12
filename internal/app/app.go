@@ -64,14 +64,18 @@ type ImportApp struct {
 	quotas      map[string]int
 	seed        string
 	outPath     string
+	limit int
+	maxDuration time.Duration
 }
 
-func NewImportApp(archivePath string, quotas map[string]int, seed, outPath string) *ImportApp {
+func NewImportApp(archivePath string, quotas map[string]int, seed, outPath string, limit int, maxDuration time.Duration) *ImportApp {
 	return &ImportApp{
 		archivePath: archivePath,
 		quotas:      quotas,
 		seed:        seed,
 		outPath:     outPath,
+		limit: limit,
+		maxDuration: maxDuration,
 	}
 }
 

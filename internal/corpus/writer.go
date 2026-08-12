@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -156,7 +155,11 @@ func Validation(path string) (bool, error) {
 						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: channels mismatch: expected %d, got %d",
 							lineNum, rec.ID, rec.Channels, audioInfo.Channels))
 					}
-					if math.Abs(float64(audioInfo.DurationMS))-math.Abs(float64(rec.Duration)) > 100 {
+					diff := audioInfo.DurationMS - int64(rec.Duration)
+					if diff < 0 {
+						diff = -diff
+					}
+					if diff > 100 {
 						errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: duration mismatch: expected %dms, got %dms",
 							lineNum, rec.ID, rec.Duration, audioInfo.DurationMS))
 					}
@@ -201,7 +204,7 @@ func Validation(path string) (bool, error) {
 		}
 		return false, nil
 	}
-	fmt.Printf("Coprus is valid")
+
 	return true, nil
 }
 func formatDuration(ms int64) string {

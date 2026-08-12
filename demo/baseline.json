@@ -1,0 +1,547 @@
+{
+  "format_version": 1,
+  "summary": {
+    "total_records": 12,
+    "successful_result": 11,
+    "engine_errors": 0,
+    "missing_results": 0,
+    "coverage": 0.91667,
+    "reference_words": 40,
+    "hits": 28,
+    "substitutions": 4,
+    "deletions": 8,
+    "insertions": 0,
+    "wer": 0.3,
+    "cer": 0.18443,
+    "exact_matches": 4,
+    "audio_duration_ms": 18000,
+    "recognition_time_ms": 0,
+    "rtf": 0
+  },
+  "groups": {
+    "by_tag": {
+      "clean": {
+        "samples": 3,
+        "hits": 7,
+        "substitutions": 1,
+        "deletions": 1,
+        "insertions": 0,
+        "wer": 0.22222,
+        "cer": 0.02439,
+        "exact_matches": 2,
+        "audio_duration_ms": 4500,
+        "recognition_time_ms": 0,
+        "rtf": 0
+      },
+      "crowd": {
+        "samples": 8,
+        "hits": 19,
+        "substitutions": 2,
+        "deletions": 7,
+        "insertions": 0,
+        "wer": 0.32143,
+        "cer": 0.22162,
+        "exact_matches": 2,
+        "audio_duration_ms": 12000,
+        "recognition_time_ms": 0,
+        "rtf": 0
+      },
+      "farfield": {
+        "samples": 1,
+        "hits": 2,
+        "substitutions": 1,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": 0.33333,
+        "cer": 0.16667,
+        "exact_matches": 0,
+        "audio_duration_ms": 1500,
+        "recognition_time_ms": 0,
+        "rtf": 0
+      }
+    },
+    "by_duration": {
+      "long": {
+        "samples": 0,
+        "hits": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": 0,
+        "cer": 0,
+        "exact_matches": 0,
+        "audio_duration_ms": 0,
+        "recognition_time_ms": 0,
+        "rtf": 0
+      },
+      "medium": {
+        "samples": 0,
+        "hits": 0,
+        "substitutions": 0,
+        "deletions": 0,
+        "insertions": 0,
+        "wer": 0,
+        "cer": 0,
+        "exact_matches": 0,
+        "audio_duration_ms": 0,
+        "recognition_time_ms": 0,
+        "rtf": 0
+      },
+      "short": {
+        "samples": 12,
+        "hits": 28,
+        "substitutions": 4,
+        "deletions": 8,
+        "insertions": 0,
+        "wer": 0.3,
+        "cer": 0.18443,
+        "exact_matches": 4,
+        "audio_duration_ms": 18000,
+        "recognition_time_ms": 0,
+        "rtf": 0
+      }
+    }
+  },
+  "records": [
+    {
+      "id": "demo-1",
+      "reference": "мама мыла раму",
+      "hypothesis": "мама мыла раму",
+      "normalized_reference": "мама мыла раму",
+      "normalized_hypothesis": "мама мыла раму",
+      "reference_words": 3,
+      "hits": 3,
+      "substitutions": 0,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0,
+      "cer": 0,
+      "exact_match": true,
+      "tags": [
+        "clean"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "мама",
+          "hypothesis": "мама"
+        },
+        {
+          "type": "equal",
+          "reference": "мыла",
+          "hypothesis": "мыла"
+        },
+        {
+          "type": "equal",
+          "reference": "раму",
+          "hypothesis": "раму"
+        }
+      ]
+    },
+    {
+      "id": "demo-10",
+      "reference": "небо голубое и чистое",
+      "hypothesis": "небо голубое чистое",
+      "normalized_reference": "небо голубое и чистое",
+      "normalized_hypothesis": "небо голубое чистое",
+      "reference_words": 4,
+      "hits": 3,
+      "substitutions": 0,
+      "deletions": 1,
+      "insertions": 0,
+      "wer": 0.25,
+      "cer": 0.095238,
+      "exact_match": false,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "небо",
+          "hypothesis": "небо"
+        },
+        {
+          "type": "equal",
+          "reference": "голубое",
+          "hypothesis": "голубое"
+        },
+        {
+          "type": "delete",
+          "reference": "и",
+          "hypothesis": ""
+        },
+        {
+          "type": "equal",
+          "reference": "чистое",
+          "hypothesis": "чистое"
+        }
+      ]
+    },
+    {
+      "id": "demo-11",
+      "reference": "завтра будет хорошая погода",
+      "hypothesis": "",
+      "normalized_reference": "завтра будет хорошая погода",
+      "normalized_hypothesis": "",
+      "reference_words": 4,
+      "hits": 0,
+      "substitutions": 0,
+      "deletions": 4,
+      "insertions": 0,
+      "wer": 1,
+      "cer": 1,
+      "exact_match": false,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "delete",
+          "reference": "завтра",
+          "hypothesis": ""
+        },
+        {
+          "type": "delete",
+          "reference": "будет",
+          "hypothesis": ""
+        },
+        {
+          "type": "delete",
+          "reference": "хорошая",
+          "hypothesis": ""
+        },
+        {
+          "type": "delete",
+          "reference": "погода",
+          "hypothesis": ""
+        }
+      ]
+    },
+    {
+      "id": "demo-12",
+      "reference": "я хочу стать программистом",
+      "hypothesis": "я хочу стать программистом",
+      "normalized_reference": "я хочу стать программистом",
+      "normalized_hypothesis": "я хочу стать программистом",
+      "reference_words": 4,
+      "hits": 4,
+      "substitutions": 0,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0,
+      "cer": 0,
+      "exact_match": true,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "я",
+          "hypothesis": "я"
+        },
+        {
+          "type": "equal",
+          "reference": "хочу",
+          "hypothesis": "хочу"
+        },
+        {
+          "type": "equal",
+          "reference": "стать",
+          "hypothesis": "стать"
+        },
+        {
+          "type": "equal",
+          "reference": "программистом",
+          "hypothesis": "программистом"
+        }
+      ]
+    },
+    {
+      "id": "demo-2",
+      "reference": "привет мир",
+      "hypothesis": "привет мир",
+      "normalized_reference": "привет мир",
+      "normalized_hypothesis": "привет мир",
+      "reference_words": 2,
+      "hits": 2,
+      "substitutions": 0,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0,
+      "cer": 0,
+      "exact_match": true,
+      "tags": [
+        "clean"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "привет",
+          "hypothesis": "привет"
+        },
+        {
+          "type": "equal",
+          "reference": "мир",
+          "hypothesis": "мир"
+        }
+      ]
+    },
+    {
+      "id": "demo-3",
+      "reference": "кот спит на крыше",
+      "hypothesis": "кот спит накрыше",
+      "normalized_reference": "кот спит на крыше",
+      "normalized_hypothesis": "кот спит накрыше",
+      "reference_words": 4,
+      "hits": 2,
+      "substitutions": 1,
+      "deletions": 1,
+      "insertions": 0,
+      "wer": 0.5,
+      "cer": 0.058824,
+      "exact_match": false,
+      "tags": [
+        "clean"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "кот",
+          "hypothesis": "кот"
+        },
+        {
+          "type": "equal",
+          "reference": "спит",
+          "hypothesis": "спит"
+        },
+        {
+          "type": "delete",
+          "reference": "на",
+          "hypothesis": ""
+        },
+        {
+          "type": "substitute",
+          "reference": "крыше",
+          "hypothesis": "накрыше"
+        }
+      ]
+    },
+    {
+      "id": "demo-4",
+      "reference": "я люблю программирование",
+      "hypothesis": "я люблю программирование",
+      "normalized_reference": "я люблю программирование",
+      "normalized_hypothesis": "я люблю программирование",
+      "reference_words": 3,
+      "hits": 3,
+      "substitutions": 0,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0,
+      "cer": 0,
+      "exact_match": true,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "я",
+          "hypothesis": "я"
+        },
+        {
+          "type": "equal",
+          "reference": "люблю",
+          "hypothesis": "люблю"
+        },
+        {
+          "type": "equal",
+          "reference": "программирование",
+          "hypothesis": "программирование"
+        }
+      ]
+    },
+    {
+      "id": "demo-5",
+      "reference": "сегодня хорошая погода",
+      "hypothesis": "сегодня хорошая пагода",
+      "normalized_reference": "сегодня хорошая погода",
+      "normalized_hypothesis": "сегодня хорошая пагода",
+      "reference_words": 3,
+      "hits": 2,
+      "substitutions": 1,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0.333333,
+      "cer": 0.045455,
+      "exact_match": false,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "сегодня",
+          "hypothesis": "сегодня"
+        },
+        {
+          "type": "equal",
+          "reference": "хорошая",
+          "hypothesis": "хорошая"
+        },
+        {
+          "type": "substitute",
+          "reference": "погода",
+          "hypothesis": "пагода"
+        }
+      ]
+    },
+    {
+      "id": "demo-6",
+      "reference": "машина едет быстро",
+      "hypothesis": "машина едет",
+      "normalized_reference": "машина едет быстро",
+      "normalized_hypothesis": "машина едет",
+      "reference_words": 3,
+      "hits": 2,
+      "substitutions": 0,
+      "deletions": 1,
+      "insertions": 0,
+      "wer": 0.333333,
+      "cer": 0.388889,
+      "exact_match": false,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "машина",
+          "hypothesis": "машина"
+        },
+        {
+          "type": "equal",
+          "reference": "едет",
+          "hypothesis": "едет"
+        },
+        {
+          "type": "delete",
+          "reference": "быстро",
+          "hypothesis": ""
+        }
+      ]
+    },
+    {
+      "id": "demo-7",
+      "reference": "слон большой и сильный",
+      "hypothesis": "слон большой сильный",
+      "normalized_reference": "слон большой и сильный",
+      "normalized_hypothesis": "слон большой сильный",
+      "reference_words": 4,
+      "hits": 3,
+      "substitutions": 0,
+      "deletions": 1,
+      "insertions": 0,
+      "wer": 0.25,
+      "cer": 0.090909,
+      "exact_match": false,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "слон",
+          "hypothesis": "слон"
+        },
+        {
+          "type": "equal",
+          "reference": "большой",
+          "hypothesis": "большой"
+        },
+        {
+          "type": "delete",
+          "reference": "и",
+          "hypothesis": ""
+        },
+        {
+          "type": "equal",
+          "reference": "сильный",
+          "hypothesis": "сильный"
+        }
+      ]
+    },
+    {
+      "id": "demo-8",
+      "reference": "компьютер работает быстро",
+      "hypothesis": "компьютер работать быстро",
+      "normalized_reference": "компьютер работает быстро",
+      "normalized_hypothesis": "компьютер работать быстро",
+      "reference_words": 3,
+      "hits": 2,
+      "substitutions": 1,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0.333333,
+      "cer": 0.08,
+      "exact_match": false,
+      "tags": [
+        "crowd"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "компьютер",
+          "hypothesis": "компьютер"
+        },
+        {
+          "type": "substitute",
+          "reference": "работает",
+          "hypothesis": "работать"
+        },
+        {
+          "type": "equal",
+          "reference": "быстро",
+          "hypothesis": "быстро"
+        }
+      ]
+    },
+    {
+      "id": "demo-9",
+      "reference": "море волнуется раз",
+      "hypothesis": "море волнуется два",
+      "normalized_reference": "море волнуется раз",
+      "normalized_hypothesis": "море волнуется два",
+      "reference_words": 3,
+      "hits": 2,
+      "substitutions": 1,
+      "deletions": 0,
+      "insertions": 0,
+      "wer": 0.333333,
+      "cer": 0.166667,
+      "exact_match": false,
+      "tags": [
+        "farfield"
+      ],
+      "alignment": [
+        {
+          "type": "equal",
+          "reference": "море",
+          "hypothesis": "море"
+        },
+        {
+          "type": "equal",
+          "reference": "волнуется",
+          "hypothesis": "волнуется"
+        },
+        {
+          "type": "substitute",
+          "reference": "раз",
+          "hypothesis": "два"
+        }
+      ]
+    }
+  ]
+}

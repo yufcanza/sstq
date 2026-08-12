@@ -13,3 +13,7 @@ test.tar
 *.dll
 *txt
 /corpus
+!demo/baseline.json
+!demo/hypotheses.jsonl
+!demo/manifest.jsonl
+*.html

@@ -4,9 +4,10 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
-//Успешный запуск evaluate
+// Успешный запуск evaluate
 func TestEvalApp_Run(t *testing.T) {
 	manifest := createTestFile(t, `{"id":"1","text":"привет"}`)
 	hyp := createTestFile(t, `{"id":"1","text":"привет"}`)
@@ -17,7 +18,8 @@ func TestEvalApp_Run(t *testing.T) {
 		t.Errorf("Ошибка: %v", err)
 	}
 }
-//Ошибка при неправильном манифесте
+
+// Ошибка при неправильном манифесте
 func TestEvalApp_InvalidManifest(t *testing.T) {
 	manifest := createTestFile(t, `invalid json`)
 	hyp := createTestFile(t, `{"id":"1","text":"привет"}`)
@@ -27,7 +29,8 @@ func TestEvalApp_InvalidManifest(t *testing.T) {
 		t.Error("Ожидалась ошибка")
 	}
 }
-//Валидация если нет аудио а запись есть
+
+// Валидация если нет аудио а запись есть
 func TestValidateApp_Valid(t *testing.T) {
 	manifest := createTestFile(t, `{"id":"1","text":"текст","audio":"1.wav","language":"ru","duration_ms":1000,"sample_rate":16000,"channels":1}`)
 
@@ -37,7 +40,7 @@ func TestValidateApp_Valid(t *testing.T) {
 	}
 }
 
-//Валидация в пустом манифесте
+// Валидация в пустом манифесте
 func TestValidateApp_Invalid(t *testing.T) {
 	manifest := createTestFile(t, `{"id":"1"}`)
 
@@ -46,16 +49,17 @@ func TestValidateApp_Invalid(t *testing.T) {
 		t.Error("Ожидалась ошибка: некорректный манифест")
 	}
 }
-//Тест import-app при несуществующем архиве
+
+// Тест import-app при несуществующем архиве
 func TestImportApp_Run(t *testing.T) {
 	quotas := map[string]int{"crowd": 5, "farfield": 2}
 	out := t.TempDir()
 
-	app := NewImportApp("nonexistent.tar", quotas, "test-seed", out)
+	app := NewImportApp("nonexistent.tar", quotas, "test-seed", out, 250, 30*time.Minute)
 	if err := app.Run(); err == nil {
 		t.Error("Ожидалась ошибка: нет архива")
 	}
-} 
+}
 
 func createTestFile(t *testing.T, content string) string {
 	t.Helper()
