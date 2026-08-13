@@ -188,7 +188,6 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 			byTag[tag] = stats
 		}
 
-
 		if res.DurationMS <= 3000 {
 			group = "short"
 		} else if res.DurationMS <= 10000 {
@@ -244,34 +243,57 @@ func (b *Builder) calculateGroups(results []corpus.Result) Groups {
 		byTag[tag] = stats
 	}
 	for group, stats := range byDuration {
-			totalErrors := stats.Substitutions + stats.Deletions + stats.Insertions
-			totalWords := 0
-			for _, res := range results {
-				var g string
-				if res.DurationMS <= 3000 {
-					g = "short"
-				} else if res.DurationMS <= 10000 {
-					g = "medium"
-				} else {
-					g = "long"
-				}
-				if g == group {
-					totalWords += res.ReferenceWords
-				}
+		totalErrors := stats.Substitutions + stats.Deletions + stats.Insertions
+		totalWords := 0
+		for _, res := range results {
+			var g string
+			if res.DurationMS <= 3000 {
+				g = "short"
+			} else if res.DurationMS <= 10000 {
+				g = "medium"
+			} else {
+				g = "long"
 			}
-			if totalWords > 0 {
-				stats.WER = math.Round(float64(totalErrors)/float64(totalWords)*100000) / 100000
+			if g == group {
+				totalWords += res.ReferenceWords
 			}
-			if cer, ok := durationCER[group]; ok && cer.charTotal > 0 {
-				stats.CER = math.Round(float64(cer.charErrors)/float64(cer.charTotal)*100000) / 100000
-			}
-			if stats.AudioDurationMS > 0 && stats.RecognitionTimeMS > 0 {
-				stats.RTF = math.Round(float64(stats.RecognitionTimeMS)/float64(stats.AudioDurationMS)*100000) / 100000
-			}
-			byDuration[group] = stats
 		}
+		if totalWords > 0 {
+			stats.WER = math.Round(float64(totalErrors)/float64(totalWords)*100000) / 100000
+		}
+		if cer, ok := durationCER[group]; ok && cer.charTotal > 0 {
+			stats.CER = math.Round(float64(cer.charErrors)/float64(cer.charTotal)*100000) / 100000
+		}
+		if stats.AudioDurationMS > 0 && stats.RecognitionTimeMS > 0 {
+			stats.RTF = math.Round(float64(stats.RecognitionTimeMS)/float64(stats.AudioDurationMS)*100000) / 100000
+		}
+		byDuration[group] = stats
+	}
+	durationOrder := []string{"short", "medium", "long"}
+	var tagNames []string
+	for tag := range byTag {
+		tagNames = append(tagNames, tag)
+	}
+	sort.Strings(tagNames)
+
+	var durationNames []string
+	for _, name := range durationOrder {
+		if _, exists := byDuration[name]; exists {
+			durationNames = append(durationNames, name)
+		}
+	}
+	sortedByTag := make(map[string]GroupStats)
+	for _, tag := range tagNames {
+		sortedByTag[tag] = byTag[tag]
+	}
+
+	sortedByDuration := make(map[string]GroupStats)
+	for _, name := range durationNames {
+		sortedByDuration[name] = byDuration[name]
+	}
+
 	return Groups{
-		ByTag:      byTag,
-		ByDuration: byDuration,
+		ByTag:      sortedByTag,
+		ByDuration: sortedByDuration,
 	}
 }

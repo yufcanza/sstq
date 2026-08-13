@@ -14,7 +14,9 @@ type Manifest struct {
 type Hypothesis struct {
 	ID                string `json:"id"`
 	Text              string `json:"text"`
-	RecognitionTimeMS int64  `json:"recognition_time"`
+	Error             string `json:"error,omitempty"`
+	RecognitionTimeMS int64  `json:"recognition-time-ms"`
+	Status            string `json:"status"`
 }
 type GolosRecord struct {
 	AudioFilePath string  `json:"audio_filepath"`

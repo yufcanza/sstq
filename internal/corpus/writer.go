@@ -2,6 +2,7 @@ package corpus
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sttq/internal/atomicfile"
 )
 
 type Writer struct{}
@@ -19,31 +21,32 @@ func NewWriter() *Writer {
 }
 
 func (w *Writer) WriteManifest(path string, records []Record) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("Ошибка создания файла %s: %w", path, err)
-	}
-	defer file.Close()
+	var buf bytes.Buffer
 
-	encoder := json.NewEncoder(file)
-	for _, record := range records {
-		if err := encoder.Encode(record); err != nil {
-			return fmt.Errorf("Ошибка записи: %w", err)
+	for _, rec := range records {
+		data, err := json.Marshal(rec)
+		if err != nil {
+			return fmt.Errorf("Ошибка маршалинга записи %s: %w", rec.ID, err)
 		}
+		buf.Write(data)
+		buf.WriteByte('\n')
+	}
+
+	if err := atomicfile.WriteFile(path, buf.Bytes(), 0644); err != nil {
+		return fmt.Errorf("Ошибка записи манифеста: %w", err)
 	}
 	return nil
 }
 
 func writeJSON(path string, data interface{}) error {
-	file, err := os.Create(path)
+	jsonData, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
-		return fmt.Errorf("не удалось создать файл: %v", err)
+		return fmt.Errorf("Ошибка маршалинга json: %w", err)
 	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(data)
+	if err := atomicfile.WriteFile(path, jsonData, 0644); err != nil {
+		return fmt.Errorf("Ошибка атомарной записи: %w", err)
+	}
+	return nil
 }
 func Statistic(path string) error {
 	file, err := os.Open(path)

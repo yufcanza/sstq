@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"sttq/internal/atomicfile"
 	"time"
 )
 
@@ -171,13 +172,11 @@ func copyFile(src, dst string) error {
 	}
 	defer srcFile.Close()
 
-	dstFile, err := os.Create(dst)
+	info, err := srcFile.Stat()
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
-
-	if _, err := io.Copy(dstFile, srcFile); err != nil {
+	if err := atomicfile.WriteReader(dst, srcFile, info.Mode().Perm()); err != nil {
 		return err
 	}
 

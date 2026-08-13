@@ -1,11 +1,12 @@
 package report
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"os"
-	"path/filepath"
+	"sttq/internal/atomicfile"
 )
 
 func Write(path string, report Report) error {
@@ -14,23 +15,17 @@ func Write(path string, report Report) error {
 		return fmt.Errorf("ошибка сериализации отчета: %w", err)
 	}
 
-	if err := os.WriteFile(path, data, 0644); err != nil {
-		return fmt.Errorf("ошибка записи файла: %w", err)
-	}
-	return nil
+	return atomicfile.WriteFile(path, data, 0644)
 }
 func WriteHTML(jsonPath, htmlPath string) error {
-	if err := os.MkdirAll(filepath.Dir(htmlPath), 0755); err != nil {
-		return err
-	}
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("Ошибка чтения json: %w", err)
 	}
 
 	var report Report
 	if err := json.Unmarshal(data, &report); err != nil {
-		return err
+		return fmt.Errorf("Ошибка парсинга json: %w", err)
 	}
 
 	t, err := template.New("report").Funcs(template.FuncMap{
@@ -39,14 +34,15 @@ func WriteHTML(jsonPath, htmlPath string) error {
 		},
 	}).Parse(tmpl)
 	if err != nil {
-		return err
+		return fmt.Errorf("Ошибка парсинга шаблона: %w", err)
 	}
 
-	f, err := os.Create(htmlPath)
-	if err != nil {
-		return err
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, report); err != nil {
+		return fmt.Errorf("Ошибка генерации HTML: %w", err)
 	}
-	defer f.Close()
-
-	return t.Execute(f, report)
+	if err := atomicfile.WriteFile(htmlPath, buf.Bytes(), 0644); err != nil {
+		return fmt.Errorf("Ошибка атомарной записи HTML: %w", err)
+	}
+	return nil
 }

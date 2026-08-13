@@ -78,9 +78,9 @@ func Compare(baselinePath, currentPath string, maxWERdelta, maxCERdelta float64)
 		cerDelta := currentRec.CER - baselineRec.CER
 
 		status := "unchanged"
-		if werDelta < -0.01 {
+		if werDelta < 0 {
 			status = "improved"
-		} else if werDelta > 0.01 {
+		} else if werDelta > 0 {
 			status = "degraded"
 		}
 
