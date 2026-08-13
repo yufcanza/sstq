@@ -64,7 +64,7 @@ type ImportApp struct {
 	quotas      map[string]int
 	seed        string
 	outPath     string
-	limit int
+	limit       int
 	maxDuration time.Duration
 }
 
@@ -74,7 +74,7 @@ func NewImportApp(archivePath string, quotas map[string]int, seed, outPath strin
 		quotas:      quotas,
 		seed:        seed,
 		outPath:     outPath,
-		limit: limit,
+		limit:       limit,
 		maxDuration: maxDuration,
 	}
 }
@@ -261,7 +261,7 @@ func (a *CompareApp) Run() int {
 
 }
 
-type AudioPrepateApp struct {
+type AudioPrepareApp struct {
 	manifestPath string
 	profile      string
 	workers      int
@@ -269,8 +269,8 @@ type AudioPrepateApp struct {
 	outDir       string
 }
 
-func NewAudioPrepateApp(manifestPath, profile string, workers int, timeout time.Duration, outDir string) *AudioPrepateApp {
-	return &AudioPrepateApp{
+func NewAudioPrepareApp(manifestPath, profile string, workers int, timeout time.Duration, outDir string) *AudioPrepareApp {
+	return &AudioPrepareApp{
 		manifestPath: manifestPath,
 		profile:      profile,
 		workers:      workers,
@@ -278,7 +278,7 @@ func NewAudioPrepateApp(manifestPath, profile string, workers int, timeout time.
 		outDir:       outDir,
 	}
 }
-func (a *AudioPrepateApp) Run() error {
+func (a *AudioPrepareApp) Run() error {
 	config := audio.PrepareConfig{
 		ManifestPath: a.manifestPath,
 		Profile:      a.profile,

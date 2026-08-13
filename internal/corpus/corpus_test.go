@@ -196,6 +196,23 @@ func TestValidate_DuplicateFile(t *testing.T) {
 }
 
 //Неверная SHA-256
+func TestValidate_BadSHA256(t *testing.T) {
+	dir := t.TempDir()
+	audioPath := filepath.Join(dir, "test.wav")
+	if err := os.WriteFile(audioPath, []byte("audio-bytes"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	content := `{"id":"1","audio":"test.wav","text":"текст","language":"ru","duration_ms":1000,"sample_rate":16000,"channels":1,"tags":["test"],"sha256":"0000000000000000000000000000000000000000000000000000000000000000"}`
+	manifestPath := filepath.Join(dir, "manifest.jsonl")
+	if err := os.WriteFile(manifestPath, []byte(content+"\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	ok, _ := Validation(manifestPath)
+	if ok {
+		t.Error("ожидалась ошибка из за неверной суммы")
+	}
+}
 
 // Небезопасный пусть
 func TestValidate_UnsafePath(t *testing.T) {

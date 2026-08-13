@@ -194,6 +194,9 @@ func runCompare() {
 }
 
 func runAudioPrepare() {
+	if len(os.Args) < 3 || os.Args[2] != "prepare" {
+        log.Fatal("Неккоректное использование: sttq audio prepare")
+    }
 	flags := flag.NewFlagSet("audio-prepare", flag.ExitOnError)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
@@ -207,12 +210,15 @@ func runAudioPrepare() {
 	if err != nil {
 		log.Fatalf("Некорректный --max-duration %q: %v", *timeoutStr, err)
 	}
-	StartPrepare := app.NewAudioPrepateApp(*manifestPath, *profile, *workers, timeout, *outDir)
+	StartPrepare := app.NewAudioPrepareApp(*manifestPath, *profile, *workers, timeout, *outDir)
 	if err := StartPrepare.Run(); err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
 }
 func runRun() {
+	if len(os.Args) < 3 || os.Args[2] != "whispercpp" {
+        log.Fatal("Неккоректное использование: sttq run whispercpp")
+    }
 	flags := flag.NewFlagSet("run", flag.ExitOnError)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")

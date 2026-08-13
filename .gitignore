@@ -16,4 +16,4 @@ test.tar
 !demo/baseline.json
 !demo/hypotheses.jsonl
 !demo/manifest.jsonl
-!testdata/control/**/*.json
+!testdata/control/**/*.jsonl

@@ -41,6 +41,7 @@ func WriteFile(filename string, data []byte, perm os.FileMode) error {
 	if err := os.Rename(tmpName, filename); err != nil {
 		return fmt.Errorf("Ошибка переименования: %w", err)
 	}
+	clean = false
 	return nil
 }
 
@@ -57,7 +58,7 @@ func WriteReader(filename string, reader io.Reader, perm os.FileMode) error {
 	clean := true
 	defer func() {
 		if clean {
-			os.Remove(tmpName)
+			_ = os.Remove(tmpName)
 		}
 	}()
 	if _, err := io.Copy(tmpFile, reader); err != nil {
@@ -78,6 +79,7 @@ func WriteReader(filename string, reader io.Reader, perm os.FileMode) error {
 	if err := os.Rename(tmpName, filename); err != nil {
 		return fmt.Errorf("Ошибка переименования: %w", err)
 	}
+	clean = false
 	return nil
 
 }
