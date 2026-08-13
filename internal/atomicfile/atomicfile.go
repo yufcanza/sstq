@@ -17,8 +17,9 @@ func WriteFile(filename string, data []byte, perm os.FileMode) error {
 		return fmt.Errorf("Ошибка создания временного файла: %w", err)
 	}
 	tmpName := tmpFile.Name()
+	clean := true
 	defer func() {
-		if err != nil {
+		if clean {
 			os.Remove(tmpName)
 		}
 	}()
@@ -53,8 +54,9 @@ func WriteReader(filename string, reader io.Reader, perm os.FileMode) error {
 		return fmt.Errorf("Ошибка создания временного файла: %w", err)
 	}
 	tmpName := tmpFile.Name()
+	clean := true
 	defer func() {
-		if err != nil {
+		if clean {
 			os.Remove(tmpName)
 		}
 	}()

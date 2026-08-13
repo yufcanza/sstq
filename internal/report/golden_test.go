@@ -41,7 +41,7 @@ func TestGoldenReport(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Ошибка чтения результата: %v", err)
 	}
-	goldenPath := filepath.Join("..", "..", "testdata", "golden", "expected_report.json")
+	goldenPath := filepath.Join("..", "..", "testdata", "control", "expected_report.json")
 
 	if *update {
 		if err := os.WriteFile(goldenPath, got, 0644); err != nil {
@@ -98,7 +98,7 @@ func TestGoldenHTML(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Ошибка чтения результата: %v", err)
 	}
-	goldenPath := filepath.Join("..", "..", "testdata", "golden", "expected_report.html")
+	goldenPath := filepath.Join("..", "..", "testdata", "control", "expected_report.html")
 
 	if *update {
 		if err := os.WriteFile(goldenPath, got, 0644); err != nil {
@@ -122,7 +122,7 @@ func TestGoldenHTML(t *testing.T) {
 func TestGoldenCompare(t *testing.T) {
 
 	baselinePath := filepath.Join("..", "..", "testdata", "golden", "baseline.json")
-	currentPath := filepath.Join("..", "..", "testdata", "golden", "expected_report.json")
+	currentPath := filepath.Join("..", "..", "testdata", "control", "expected_report.json")
 
 	result, err, _ := Compare(baselinePath, currentPath, 0.02, 0.02)
 	if err != nil {
@@ -132,7 +132,7 @@ func TestGoldenCompare(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Ошибка маршаллинга: %v", err)
 	}
-	goldenPath := filepath.Join("..", "..", "testdata", "golden", "expected_compare.json")
+	goldenPath := filepath.Join("..", "..", "testdata", "control", "expected_compare.json")
 
 	if *update {
 		if err := os.WriteFile(goldenPath, got, 0644); err != nil {

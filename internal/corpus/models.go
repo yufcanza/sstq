@@ -36,7 +36,7 @@ type Record struct {
 	Audio      string   `json:"audio"`
 	Text       string   `json:"text"`
 	Language   string   `json:"language"`
-	Duration   int      `json:"duration_ms"`
+	Duration   int64    `json:"duration_ms"`
 	SampleRate int      `json:"sample_rate"`
 	Channels   int      `json:"channels"`
 	Tags       []string `json:"tags"`
@@ -60,7 +60,7 @@ type ImportSummary struct {
 }
 type SelectionInfo struct {
 	Source         string         `json:"source"`
-	Seed           string         `json:"string"`
+	Seed           string         `json:"seed"`
 	RequestRecords int            `json:"request_records"`
 	MaxDuration    int64          `json:"max_duration_ms"`
 	Quotas         map[string]int `json:"quotas"`

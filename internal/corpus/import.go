@@ -83,7 +83,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 			Audio:      filepath.Join("audio", rec.ID+".wav"),
 			Text:       rec.Text,
 			Language:   "ru",
-			Duration:   int(durationS),
+			Duration:   int64(durationS),
 			SampleRate: sampleRate,
 			Channels:   channels,
 			Tags:       []string{rec.Domain},

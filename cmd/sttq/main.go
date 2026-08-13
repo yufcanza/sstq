@@ -168,7 +168,7 @@ func runReport() {
 	flags := flag.NewFlagSet("report", flag.ExitOnError)
 	var (
 		inputPath  = flags.String("input", "report.json", "Путь к json-отчету")
-		format     = flags.String("format", "html", "формат вывода: hmtl")
+		format     = flags.String("format", "html", "формат вывода: html")
 		outputPath = flags.String("out", "report.html", "Путь вывода отчета")
 	)
 
@@ -194,7 +194,7 @@ func runCompare() {
 }
 
 func runAudioPrepare() {
-	flags := flag.NewFlagSet("audio-prepate", flag.ExitOnError)
+	flags := flag.NewFlagSet("audio-prepare", flag.ExitOnError)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
 		profile      = flags.String("profile", "wav-16k", "профиль: wav-16-k или wav-8-k")

@@ -15,8 +15,8 @@
     "cer": 0.29921,
     "exact_matches": 3,
     "audio_duration_ms": 14565,
-    "recognition_time_ms": 23380,
-    "rtf": 1.60522
+    "recognition_time_ms": 0,
+    "rtf": 0
   },
   "groups": {
     "by_tag": {
@@ -30,8 +30,8 @@
         "cer": 0.29921,
         "exact_matches": 3,
         "audio_duration_ms": 14565,
-        "recognition_time_ms": 23380,
-        "rtf": 1.60522
+        "recognition_time_ms": 0,
+        "rtf": 0
       }
     },
     "by_duration": {
@@ -58,8 +58,8 @@
         "cer": 0.35,
         "exact_matches": 1,
         "audio_duration_ms": 7305,
-        "recognition_time_ms": 13380,
-        "rtf": 1.83162
+        "recognition_time_ms": 0,
+        "rtf": 0
       },
       "short": {
         "samples": 3,
@@ -71,8 +71,8 @@
         "cer": 0.11111,
         "exact_matches": 2,
         "audio_duration_ms": 7260,
-        "recognition_time_ms": 10000,
-        "rtf": 1.37741
+        "recognition_time_ms": 0,
+        "rtf": 0
       }
     }
   },
