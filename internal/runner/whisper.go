@@ -72,7 +72,7 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Error:           fmt.Sprintf("Ошибка strout: %v", err),
 			Status:          "error",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	defer strout.Close()
@@ -82,7 +82,7 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Error:           fmt.Sprintf("Ошибка strerr:%v", err),
 			Status:          "error",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	defer strerr.Close()
@@ -92,7 +92,7 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Error:           fmt.Sprintf("Ошибка запуска: %v", err),
 			Status:          "error",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 
@@ -116,7 +116,7 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Error:           fmt.Sprintf("Ошибка чтения вывода: %v", err),
 			Status:          "error",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	var strerrOutput strings.Builder
@@ -149,7 +149,7 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Error:           fmt.Sprintf("Ошибка чтения strerr: %v", err),
 			Status:          "error",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 
@@ -159,14 +159,14 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 				ID:              task.ID,
 				Error:           "Превышено время ожидания",
 				Status:          "timeout",
-				RecognitionTime: time.Since(start),
+				RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 			}
 		}
 		return Result{
 			ID:              task.ID,
 			Error:           fmt.Sprintf("Ошибка выполнения: %v", err),
 			Status:          "error",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	text := strings.TrimSpace(hypothesis.String())
@@ -196,6 +196,6 @@ func (w *WhisperRunner) Run(ctx context.Context, task Task) Result {
 		ID:              task.ID,
 		Hypothesis:      text,
 		Status:          "success",
-		RecognitionTime: time.Since(start),
+		RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 	}
 }

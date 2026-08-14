@@ -3,6 +3,7 @@ package report
 import (
 	"math"
 	"sort"
+	"strings"
 	"sttq/internal/corpus"
 )
 
@@ -93,9 +94,7 @@ func (b *Builder) calculateSummary(results []corpus.Result, errors []ErrorEntry)
 	DeletionsCER := 0
 	InsertionsCER := 0
 	for _, res := range results {
-		if res.Hypothesis != "" {
-			summary.SuccessfulResults++
-		}
+		summary.SuccessfulResults++
 		summary.ReferenceWords += res.ReferenceWords
 		summary.Hits += res.Hits
 		summary.Substitutions += res.Substitutions
@@ -116,10 +115,11 @@ func (b *Builder) calculateSummary(results []corpus.Result, errors []ErrorEntry)
 		}
 	}
 	for _, err := range errors {
-		if err.Message == "error" {
-			summary.EngineErrors++
-		} else {
+		msg := strings.ToLower(err.Message)
+		if strings.Contains(msg, "no hypothesis") || strings.Contains(msg, "missing") {
 			summary.MissingResults++
+		} else {
+			summary.EngineErrors++
 		}
 	}
 	totalErrors := summary.Substitutions + summary.Deletions + summary.Insertions

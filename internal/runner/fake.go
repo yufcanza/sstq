@@ -57,7 +57,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			return Result{
 				ID:              task.ID,
 				Status:          "skipped",
-				RecognitionTime: time.Since(start),
+				RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 			}
 		}
 	}
@@ -74,7 +74,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Status:          "error",
 			Error:           "context canceled",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	case <-time.After(delay):
 	}
@@ -83,7 +83,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Status:          "timeout",
 			Error:           "Превышено время ожидания",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Microseconds()),
 		}
 	}
 	if ctx.Err() != nil {
@@ -91,7 +91,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Status:          "error",
 			Error:           "context canceled",
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	if f.fake.Error != "" {
@@ -99,7 +99,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Status:          "error",
 			Error:           f.fake.Error,
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	if f.fake.FailOnIDs[task.ID] {
@@ -107,7 +107,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Status:          "error",
 			Error:           fmt.Sprintf("fake fail for id %s", task.ID),
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	if f.fake.ExitCode != 0 {
@@ -119,7 +119,7 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 			ID:              task.ID,
 			Status:          "error",
 			Error:           errMsg,
-			RecognitionTime: time.Since(start),
+			RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 		}
 	}
 	text := strings.TrimSpace(f.fake.Hypothesis)
@@ -154,6 +154,6 @@ func (f *FakeWhisperRunner) Run(ctx context.Context, task Task) Result {
 		ID:              task.ID,
 		Hypothesis:      strings.TrimSpace(text),
 		Status:          "success",
-		RecognitionTime: time.Since(start),
+		RecognitionTime: time.Duration(time.Since(start).Milliseconds()),
 	}
 }

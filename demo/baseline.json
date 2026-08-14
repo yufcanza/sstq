@@ -3,48 +3,35 @@
   "summary": {
     "total_records": 12,
     "successful_result": 11,
-    "engine_errors": 0,
+    "engine_errors": 1,
     "missing_results": 0,
     "coverage": 0.91667,
-    "reference_words": 40,
+    "reference_words": 36,
     "hits": 28,
     "substitutions": 4,
-    "deletions": 8,
+    "deletions": 4,
     "insertions": 0,
-    "wer": 0.3,
-    "cer": 0.18443,
+    "wer": 0.22222,
+    "cer": 0.08295,
     "exact_matches": 4,
-    "audio_duration_ms": 18000,
-    "recognition_time_ms": 0,
-    "rtf": 0
+    "audio_duration_ms": 16500,
+    "recognition_time_ms": 1238,
+    "rtf": 0.07503
   },
   "groups": {
     "by_tag": {
-      "clean": {
-        "samples": 3,
-        "hits": 7,
-        "substitutions": 1,
-        "deletions": 1,
-        "insertions": 0,
-        "wer": 0.22222,
-        "cer": 0.02439,
-        "exact_matches": 2,
-        "audio_duration_ms": 4500,
-        "recognition_time_ms": 0,
-        "rtf": 0
-      },
       "crowd": {
-        "samples": 8,
-        "hits": 19,
-        "substitutions": 2,
-        "deletions": 7,
+        "samples": 10,
+        "hits": 26,
+        "substitutions": 3,
+        "deletions": 4,
         "insertions": 0,
-        "wer": 0.32143,
-        "cer": 0.22162,
-        "exact_matches": 2,
-        "audio_duration_ms": 12000,
-        "recognition_time_ms": 0,
-        "rtf": 0
+        "wer": 0.21212,
+        "cer": 0.07538,
+        "exact_matches": 4,
+        "audio_duration_ms": 15000,
+        "recognition_time_ms": 1138,
+        "rtf": 0.07587
       },
       "farfield": {
         "samples": 1,
@@ -56,8 +43,8 @@
         "cer": 0.16667,
         "exact_matches": 0,
         "audio_duration_ms": 1500,
-        "recognition_time_ms": 0,
-        "rtf": 0
+        "recognition_time_ms": 100,
+        "rtf": 0.06667
       }
     },
     "by_duration": {
@@ -88,17 +75,17 @@
         "rtf": 0
       },
       "short": {
-        "samples": 12,
+        "samples": 11,
         "hits": 28,
         "substitutions": 4,
-        "deletions": 8,
+        "deletions": 4,
         "insertions": 0,
-        "wer": 0.3,
-        "cer": 0.18443,
+        "wer": 0.22222,
+        "cer": 0.08295,
         "exact_matches": 4,
-        "audio_duration_ms": 18000,
-        "recognition_time_ms": 0,
-        "rtf": 0
+        "audio_duration_ms": 16500,
+        "recognition_time_ms": 1238,
+        "rtf": 0.07503
       }
     }
   },
@@ -118,7 +105,7 @@
       "cer": 0,
       "exact_match": true,
       "tags": [
-        "clean"
+        "crowd"
       ],
       "alignment": [
         {
@@ -179,46 +166,6 @@
       ]
     },
     {
-      "id": "demo-11",
-      "reference": "завтра будет хорошая погода",
-      "hypothesis": "",
-      "normalized_reference": "завтра будет хорошая погода",
-      "normalized_hypothesis": "",
-      "reference_words": 4,
-      "hits": 0,
-      "substitutions": 0,
-      "deletions": 4,
-      "insertions": 0,
-      "wer": 1,
-      "cer": 1,
-      "exact_match": false,
-      "tags": [
-        "crowd"
-      ],
-      "alignment": [
-        {
-          "type": "delete",
-          "reference": "завтра",
-          "hypothesis": ""
-        },
-        {
-          "type": "delete",
-          "reference": "будет",
-          "hypothesis": ""
-        },
-        {
-          "type": "delete",
-          "reference": "хорошая",
-          "hypothesis": ""
-        },
-        {
-          "type": "delete",
-          "reference": "погода",
-          "hypothesis": ""
-        }
-      ]
-    },
-    {
       "id": "demo-12",
       "reference": "я хочу стать программистом",
       "hypothesis": "я хочу стать программистом",
@@ -273,7 +220,7 @@
       "cer": 0,
       "exact_match": true,
       "tags": [
-        "clean"
+        "crowd"
       ],
       "alignment": [
         {
@@ -303,7 +250,7 @@
       "cer": 0.058824,
       "exact_match": false,
       "tags": [
-        "clean"
+        "crowd"
       ],
       "alignment": [
         {
@@ -542,6 +489,13 @@
           "hypothesis": "два"
         }
       ]
+    }
+  ],
+  "errors": [
+    {
+      "id": "demo-11",
+      "code": "no hypothesis",
+      "message": "engine error: error"
     }
   ]
 }

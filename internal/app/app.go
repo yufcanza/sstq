@@ -378,7 +378,7 @@ func (a *RunApp) Run() error {
 			continue
 		}
 		totalTasks++
-		audioPath := filepath.Join("corpus", rec.Audio)
+		audioPath := filepath.Join("corpus", filepath.FromSlash(rec.Audio))
 
 		pool.Submit(runner.Task{
 			ID:      rec.ID,

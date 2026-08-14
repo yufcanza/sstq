@@ -140,7 +140,7 @@ func Validation(path string) (bool, error) {
 		} else if strings.Contains(rec.Audio, "..") {
 			errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: audio path %q выходит за пределы каталога", lineNum, rec.ID, rec.Audio))
 		} else {
-			audioPath := filepath.Join(Dir, rec.Audio)
+			audioPath := filepath.Join(Dir, filepath.FromSlash(rec.Audio))
 			if _, err := os.Stat(audioPath); os.IsNotExist(err) {
 				errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q audio file %q не найден", lineNum, rec.ID, rec.Audio))
 			} else {

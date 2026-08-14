@@ -80,7 +80,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 
 		finalRecords = append(finalRecords, Record{
 			ID:         rec.ID,
-			Audio:      filepath.Join("audio", rec.ID+".wav"),
+			Audio:      filepath.ToSlash(filepath.Join("audio", rec.ID+".wav")),
 			Text:       rec.Text,
 			Language:   "ru",
 			Duration:   int64(durationS),

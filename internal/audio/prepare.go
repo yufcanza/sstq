@@ -92,7 +92,7 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 }
 
 func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig, audioDir string, ffArgs []string) Result {
-	source := rec.Audio
+	source := filepath.FromSlash(rec.Audio)
 	if source == "" {
 		return Result{ID: rec.ID,
 			Status: "error",

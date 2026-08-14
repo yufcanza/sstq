@@ -1,12 +1,12 @@
-{"id":"demo-1","audio":"audio\\demo-1.wav","text":"мама мыла раму","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["clean"],"sha256":""}
-{"id":"demo-2","audio":"audio\\demo-2.wav","text":"привет мир","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["clean"],"sha256":""}
-{"id":"demo-3","audio":"audio\\demo-3.wav","text":"кот спит на крыше","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["clean"],"sha256":""}
-{"id":"demo-4","audio":"audio\\demo-4.wav","text":"я люблю программирование","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-5","audio":"audio\\demo-5.wav","text":"сегодня хорошая погода","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-6","audio":"audio\\demo-6.wav","text":"машина едет быстро","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-7","audio":"audio\\demo-7.wav","text":"слон большой и сильный","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-8","audio":"audio\\demo-8.wav","text":"компьютер работает быстро","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-9","audio":"audio\\demo-9.wav","text":"море волнуется раз","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["farfield"],"sha256":""}
-{"id":"demo-10","audio":"audio\\demo-10.wav","text":"небо голубое и чистое","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-11","audio":"audio\\demo-11.wav","text":"завтра будет хорошая погода","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
-{"id":"demo-12","audio":"audio\\demo-12.wav","text":"я хочу стать программистом","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-1","audio":"audio/demo-1.wav","text":"мама мыла раму","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-2","audio":"audio/demo-2.wav","text":"привет мир","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-3","audio":"audio/demo-3.wav","text":"кот спит на крыше","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-4","audio":"audio/demo-4.wav","text":"я люблю программирование","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-5","audio":"audio/demo-5.wav","text":"сегодня хорошая погода","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-6","audio":"audio/demo-6.wav","text":"машина едет быстро","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-7","audio":"audio/demo-7.wav","text":"слон большой и сильный","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-8","audio":"audio/demo-8.wav","text":"компьютер работает быстро","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-9","audio":"audio/demo-9.wav","text":"море волнуется раз","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["farfield"],"sha256":""}
+{"id":"demo-10","audio":"audio/demo-10.wav","text":"небо голубое и чистое","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-11","audio":"audio/demo-11.wav","text":"завтра будет хорошая погода","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}
+{"id":"demo-12","audio":"audio/demo-12.wav","text":"я хочу стать программистом","language":"ru","duration_ms":1500,"sample_rate":16000,"channels":1,"tags":["crowd"],"sha256":""}

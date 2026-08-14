@@ -25,6 +25,25 @@ func Evaluate(manif []Manifest, hyps []Hypothesis, normalizer *normalize.Normali
 			})
 			continue
 		}
+		if hyp.Error != "" || strings.EqualFold(hyp.Status, "error") || strings.EqualFold(hyp.Status, "timeout") {
+			errMsg := hyp.Error
+			if errMsg == "" {
+				errMsg = "engine error"
+				if hyp.Status != "" {
+					errMsg = "engine error: " + hyp.Status
+				}
+			}
+			results = append(results, Result{
+				ID:                man.ID,
+				Reference:         man.Text,
+				Hypothesis:        hyp.Text,
+				Error:             errMsg,
+				Tags:              man.Tags,
+				DurationMS:        man.DurationMS,
+				RecognitionTimeMS: hyp.RecognitionTimeMS,
+			})
+			continue
+		}
 		//fmt.Printf(" Profile: %v", a.normProfile)
 		normalizedRef := normalizer.Normalize(man.Text)
 		normalizedHyp := normalizer.Normalize(hyp.Text)
@@ -57,7 +76,7 @@ func Evaluate(manif []Manifest, hyps []Hypothesis, normalizer *normalize.Normali
 			RecognitionTimeMS:   hyp.RecognitionTimeMS,
 			Tags:                man.Tags,
 			Alignment:           alignment.Items,
-			Error: "",
+			Error:               "",
 		}
 		results = append(results, result)
 

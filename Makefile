@@ -1,6 +1,14 @@
 .PHONY: build test bench golden integration demo
 
-BINARY_NAME=sttq.exe
+GOOS := $(shell go env GOOS 2>/dev/null)
+ifeq ($(GOOS),windows)
+	BINARY_NAME=sttq.exe
+	WHISPER_BINARY=./bin/whisper-cli.exe
+else
+	BINARY_NAME=sttq
+  	WHISPER_BINARY=./bin/whisper-cli
+endif
+
 DEMO_DIR=demo
 DEMO_MANIFEST=$(DEMO_DIR)/manifest.jsonl
 DEMO_HYPOTHESES=$(DEMO_DIR)/hypotheses.jsonl
@@ -9,7 +17,6 @@ DEMO_REPORT=$(DEMO_DIR)/report.json
 DEMO_HTML=$(DEMO_DIR)/report.html
 
 GOLOS_ARCHIVE=test.tar
-WHISPER_BINARY=./bin/whisper-cli.exe
 WHISPER_MODEL=./models/ggml-small.bin
 CORPUS_DIR=./corpus
 RUNS_DIR=./runs
