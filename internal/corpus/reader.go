@@ -20,7 +20,7 @@ func NewReader() *Reader {
 func (r *Reader) ReadManifest(path string) ([]Manifest, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка открытия файла %s: %v", path, err)
+		return nil, fmt.Errorf("Ошибка открытия файла %s: %w", path, err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -41,12 +41,12 @@ func (r *Reader) ReadManifest(path string) ([]Manifest, error) {
 		var man Manifest
 		err := json.Unmarshal([]byte(line), &man)
 		if err != nil {
-			return nil, fmt.Errorf("Ошибка обработки строки %d: %v", lineNum, err)
+			return nil, fmt.Errorf("Ошибка обработки строки %d: %w", lineNum, err)
 		}
 		manifest = append(manifest, man)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("Ошибка чтение файла%v", err)
+		return nil, fmt.Errorf("Ошибка чтение файла: %w", err)
 	}
 	return manifest, nil
 }
@@ -54,7 +54,7 @@ func (r *Reader) ReadManifest(path string) ([]Manifest, error) {
 func (r *Reader) ReadHypotheses(path string) ([]Hypothesis, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка открытия файла %s: %v", path, err)
+		return nil, fmt.Errorf("Ошибка открытия файла %s: %w", path, err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -75,12 +75,12 @@ func (r *Reader) ReadHypotheses(path string) ([]Hypothesis, error) {
 		var hyp Hypothesis
 		err := json.Unmarshal([]byte(line), &hyp)
 		if err != nil {
-			return nil, fmt.Errorf("Ошибка обработки строки %d: %v", lineNum, err)
+			return nil, fmt.Errorf("Ошибка обработки строки %d: %w", lineNum, err)
 		}
 		hypotheses = append(hypotheses, hyp)
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("Ошибка чтение файла%v", err)
+		return nil, fmt.Errorf("Ошибка чтение файла: %w", err)
 	}
 	return hypotheses, nil
 }
@@ -97,7 +97,7 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 
 		var raw GolosRecord
 		if err := json.Unmarshal([]byte(line), &raw); err != nil {
-			return nil, fmt.Errorf("Ошибка обработки JSON: %v", err)
+			return nil, fmt.Errorf("Ошибка обработки JSON: %w", err)
 		}
 		if strings.TrimSpace(raw.Text) == "" {
 			continue

@@ -15,12 +15,12 @@ import (
 func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	tmpDir, err := os.MkdirTemp("", "golos-import-*")
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка создания временной папки:%v", err)
+		return nil, fmt.Errorf("Ошибка создания временной папки:%w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
 	if err := ExtractTar(config.ArchivePath, tmpDir); err != nil {
-		return nil, fmt.Errorf("Ошика распаковки архива: %v", err)
+		return nil, fmt.Errorf("Ошика распаковки архива: %w", err)
 	}
 	crowdManifest := filepath.Join(tmpDir, "test", "crowd", "manifest.jsonl")
 	farfieldManifest := filepath.Join(tmpDir, "test", "farfield", "manifest.jsonl")
@@ -34,11 +34,11 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	}
 	crowdRecords, err := parseManifest(crowdData, "crowd", config.Seed)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка парсинга файла crowd: %v", err)
+		return nil, fmt.Errorf("Ошибка парсинга файла crowd: %w", err)
 	}
 	farfieldRecords, err := parseManifest(farfieldData, "farfield", config.Seed)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка парсинга файла farfield: %v", err)
+		return nil, fmt.Errorf("Ошибка парсинга файла farfield: %w", err)
 	}
 
 	allRecords := append(crowdRecords, farfieldRecords...)
@@ -47,7 +47,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 
 	audioDir := filepath.Join(config.OutDir, "audio")
 	if err := os.MkdirAll(audioDir, 0755); err != nil {
-		return nil, fmt.Errorf("Ошибка создания папки audio: %v", err)
+		return nil, fmt.Errorf("Ошибка создания папки audio: %w", err)
 	}
 
 	var finalRecords []Record
@@ -71,7 +71,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 
 		sha256Hash, err := FindSHA256(dstPath)
 		if err != nil {
-			return nil, fmt.Errorf("Ошика вычисления sha256 для %s: %v", dstPath, err)
+			return nil, fmt.Errorf("Ошика вычисления sha256 для %s: %w", dstPath, err)
 		}
 
 		sampleRate := 16000
@@ -112,7 +112,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		SelectedIDs:    selected_ids,
 	}
 	if err := writeJSON(selectionPath, SelectionInfo); err != nil {
-		return nil, fmt.Errorf("Ошибка записи selection.json: %v", err)
+		return nil, fmt.Errorf("Ошибка записи selection.json: %w", err)
 	}
 
 	summary := &ImportSummary{

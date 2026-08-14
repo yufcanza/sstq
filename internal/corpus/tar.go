@@ -12,12 +12,12 @@ import (
 func ExtractTar(tarPath, destdir string) error {
 	file, err := os.Open(tarPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка открытия архива %s: %v", tarPath, err)
+		return fmt.Errorf("Ошибка открытия архива %s: %w", tarPath, err)
 	}
 	defer file.Close()
 
 	if err := os.MkdirAll(destdir, 0755); err != nil {
-		return fmt.Errorf("Ошибка создания временной директории для архива: %v", err)
+		return fmt.Errorf("Ошибка создания временной директории для архива: %w", err)
 	}
 
 	tr := tar.NewReader(file)
@@ -28,7 +28,7 @@ func ExtractTar(tarPath, destdir string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Ошибка чтения архива: %v", err)
+			return fmt.Errorf("Ошибка чтения архива: %w", err)
 
 		}
 		if header.Typeflag == tar.TypeSymlink || header.Typeflag == tar.TypeLink {
@@ -44,20 +44,20 @@ func ExtractTar(tarPath, destdir string) error {
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if err := os.MkdirAll(targetPath, 0755); err != nil {
-				return fmt.Errorf("Ошибка создание папки: %v", err)
+				return fmt.Errorf("Ошибка создание папки: %w", err)
 			}
 
 		case tar.TypeReg:
 			if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
-				return fmt.Errorf("Ошибка создание папки: %v", err)
+				return fmt.Errorf("Ошибка создание папки: %w", err)
 			}
 			outFile, err := os.Create(targetPath)
 			if err != nil {
-				return fmt.Errorf("Ошибка создания файла %s: %v", targetPath, err)
+				return fmt.Errorf("Ошибка создания файла %s: %w", targetPath, err)
 			}
 			if _, err := io.Copy(outFile, tr); err != nil {
 				outFile.Close()
-				return fmt.Errorf("не удалось записать файл %s: %v", targetPath, err)
+				return fmt.Errorf("не удалось записать файл %s: %w", targetPath, err)
 			}
 			outFile.Close()
 		}

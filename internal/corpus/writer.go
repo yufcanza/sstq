@@ -51,7 +51,7 @@ func writeJSON(path string, data interface{}) error {
 func Statistic(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("Ошибка открытия файла:%v", err)
+		return fmt.Errorf("Ошибка открытия файла:%w", err)
 	}
 	defer file.Close()
 
@@ -86,7 +86,7 @@ func Statistic(path string) error {
 		channels[rec.Channels]++
 	}
 	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("Ошибка чления файла:%v", err)
+		return fmt.Errorf("Ошибка чления файла:%w", err)
 	}
 
 	fmt.Printf("Records: %d\n", records)
@@ -105,7 +105,7 @@ func Statistic(path string) error {
 func Validation(path string) (bool, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return false, fmt.Errorf("Ошибка открытия файла:%v", err)
+		return false, fmt.Errorf("Ошибка открытия файла:%w", err)
 	}
 	defer file.Close()
 
@@ -198,7 +198,7 @@ func Validation(path string) (bool, error) {
 
 	}
 	if err := scanner.Err(); err != nil {
-		return false, fmt.Errorf("Ошибка чления файла:%v", err)
+		return false, fmt.Errorf("Ошибка чления файла:%w", err)
 	}
 
 	if len(errors) > 0 {

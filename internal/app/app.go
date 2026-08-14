@@ -1,15 +1,20 @@
 package app
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"sttq/internal/atomicfile"
 	"sttq/internal/audio"
 	"sttq/internal/corpus"
 	"sttq/internal/normalize"
 	"sttq/internal/report"
 	"sttq/internal/runner"
+	"sync"
 	"time"
 )
 
@@ -37,11 +42,11 @@ func NewEvalApp(manPath, hypPath, outPath, normProfile string) *EvalApp {
 func (a *EvalApp) Run() error {
 	manifests, err := a.reader.ReadManifest(a.manPath)
 	if err != nil {
-		return fmt.Errorf("Ошибкк чтения эталонов: %v", err)
+		return fmt.Errorf("Ошибкк чтения эталонов: %w", err)
 	}
 	hypotheses, err := a.reader.ReadHypotheses(a.hypPath)
 	if err != nil {
-		return fmt.Errorf("Ошибкк чтения гипотез: %v", err)
+		return fmt.Errorf("Ошибкк чтения гипотез: %w", err)
 	}
 
 	result := corpus.Evaluate(manifests, hypotheses, a.normalizer)
@@ -91,7 +96,7 @@ func (a *ImportApp) Run() error {
 
 	_, err := corpus.ImportGolos(config)
 	if err != nil {
-		return fmt.Errorf("Ошибка импорта: %v", err)
+		return fmt.Errorf("Ошибка импорта: %w", err)
 	}
 
 	return nil
@@ -109,7 +114,7 @@ func NewStatsApp(manifest string) *StatApp {
 func (a *StatApp) Run() error {
 	err := corpus.Statistic(a.manPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка статистики: %v", err)
+		return fmt.Errorf("Ошибка статистики: %w", err)
 	}
 	return nil
 }
@@ -126,7 +131,7 @@ func NewValidateApp(manifest string) *ValidateApp {
 func (a *ValidateApp) Run() error {
 	valid, err := corpus.Validation(a.manPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка статистики: %v", err)
+		return fmt.Errorf("Ошибка статистики: %w", err)
 	}
 	if !valid {
 		return fmt.Errorf("Corpus invalid")
@@ -344,30 +349,28 @@ func (a *RunApp) Run() error {
 		Language:   a.language,
 		Timeout:    a.timeout,
 	})
-	outputDir := filepath.Dir(a.outputPath)
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("Ошибка создания папки %s: %w", outputDir, err)
+	var allResult []runner.Result
+	if a.resume {
+		existing, err := readExistingResult(a.outputPath)
+		if err != nil {
+			return fmt.Errorf("Ошибка чтения текущих результатов: %w", err)
+		}
+		allResult = append(allResult, existing...)
 	}
-	resultFile, err := os.OpenFile(a.outputPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		return fmt.Errorf("Ошибка открытия файлов результатов: %w", err)
-	}
-	defer resultFile.Close()
-	encoder := json.NewEncoder(resultFile)
-	var results []runner.Result
 
 	pool := runner.NewPool(a.workers, whisperRunner)
 	pool.Start()
 
-	done := make(chan bool)
+	done := make(chan struct{})
+	var newResults []runner.Result
+	var mu sync.Mutex
 	go func() {
 		for result := range pool.Results() {
-			results = append(results, result)
-			if err := encoder.Encode(result); err != nil {
-				fmt.Printf("Ошибка записи результата %s: %v\n", result.ID, err)
-			}
+			mu.Lock()
+			newResults = append(newResults, result)
+			mu.Unlock()
 		}
-		done <- true
+		close(done)
 	}()
 	totalTasks := 0
 	skipped := 0
@@ -378,7 +381,7 @@ func (a *RunApp) Run() error {
 			continue
 		}
 		totalTasks++
-		audioPath := filepath.Join("corpus", filepath.FromSlash(rec.Audio))
+		audioPath := filepath.Join(filepath.Dir(a.manifestPath), filepath.FromSlash(rec.Audio))
 
 		pool.Submit(runner.Task{
 			ID:      rec.ID,
@@ -391,11 +394,26 @@ func (a *RunApp) Run() error {
 	pool.CloseTasks()
 	<-done
 	pool.Stop()
+	allResult = append(allResult, newResults...)
+	sort.Slice(allResult, func(i, j int) bool {
+		return allResult[i].ID < allResult[j].ID
+	})
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	for _, r := range allResult {
+		if err := enc.Encode(r); err != nil {
+			return fmt.Errorf("Oшибка сериализации результата %s: %w", r.ID, err)
+		}
+	}
+	if err := atomicfile.WriteFile(a.outputPath, buf.Bytes(), 0644); err != nil {
+		return fmt.Errorf("Oшибка атомарной записи результатов: %w", err)
+	}
 
 	success := 0
 	errors := 0
 	timeouts := 0
-	for _, r := range results {
+	for _, r := range newResults {
 		switch r.Status {
 		case "success":
 			success++
@@ -411,4 +429,33 @@ func (a *RunApp) Run() error {
 	fmt.Printf("Результаты сохранены в: %s\n", a.outputPath)
 
 	return nil
+}
+
+func readExistingResult(path string) ([]runner.Result, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+
+	var results []runner.Result
+	scanner := bufio.NewScanner(f)
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
+
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if len(line) == 0 {
+			continue
+		}
+		var r runner.Result
+		if err := json.Unmarshal(line, &r); err != nil {
+			continue
+		}
+		results = append(results, r)
+	}
+	return results, scanner.Err()
 }
