@@ -15,6 +15,7 @@ var version = "dev"
 
 func main() {
 	if len(os.Args) < 2 {
+		printUsage()
 		os.Exit(1)
 	}
 	command := os.Args[1]
@@ -33,6 +34,10 @@ func main() {
 		runAudioPrepare()
 	case "run":
 		runRun()
+	default:
+		fmt.Printf("Неизвестная команда: %s\n", command)
+		printUsage()
+		os.Exit(1)
 	}
 
 }
@@ -70,6 +75,11 @@ func runEvaluate() {
 
 }
 func runCorpus() {
+	if len(os.Args) < 3 {
+		log.Printf("Подкоманда corpus не задана")
+		printUsage()
+		os.Exit(0)
+	}
 	subcommand := os.Args[2]
 	switch subcommand {
 	case "import-golos":
@@ -78,7 +88,6 @@ func runCorpus() {
 		runStats()
 	case "validate":
 		runValidate()
-
 	}
 }
 
@@ -194,9 +203,13 @@ func runCompare() {
 }
 
 func runAudioPrepare() {
-	if len(os.Args) < 3 || os.Args[2] != "prepare" {
-        log.Fatal("Неккоректное использование: sttq audio prepare")
-    }
+	if len(os.Args) < 3 {
+		log.Fatal("Использование: sttq audio prepare")
+	}
+	if os.Args[2] != "prepare" {
+		log.Fatal("Неккоректное использование: sttq audio prepare")
+		printUsage()
+	}
 	flags := flag.NewFlagSet("audio-prepare", flag.ExitOnError)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
@@ -216,9 +229,13 @@ func runAudioPrepare() {
 	}
 }
 func runRun() {
-	if len(os.Args) < 3 || os.Args[2] != "whispercpp" {
-        log.Fatal("Неккоректное использование: sttq run whispercpp")
-    }
+	if len(os.Args) < 3 {
+		log.Fatal("Использование: run whispercpp")
+	}
+	if os.Args[2] != "whispercpp" {
+		log.Fatal("Неккоректное использование: sttq run whispercpp")
+		printUsage()
+	}
 	flags := flag.NewFlagSet("run", flag.ExitOnError)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
@@ -239,4 +256,19 @@ func runRun() {
 	if err := StartRun.Run(); err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
+}
+
+func printUsage() {
+	fmt.Println("Использование: sttq <команда>")
+	fmt.Println()
+	fmt.Println("Доступные команды: ")
+	fmt.Println("version				Версия программы")
+	fmt.Println("evaluate			Оценка качества")
+	fmt.Println("corpus import-golos		Импорт корпуса")
+	fmt.Println("corpus validate			Валидация корпуса")
+	fmt.Println("corpus stats			Статистика корпуса")
+	fmt.Println("report				Отчет")
+	fmt.Println("compare				Сравнение в baseline")
+	fmt.Println("audio prepare			Подготовка аудио")
+	fmt.Println("run whispercpp			Запуск whisper.cpp")
 }

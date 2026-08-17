@@ -151,6 +151,20 @@ func TestCER(t *testing.T) {
 				I:           0,
 			},
 		},
+		{
+			name: "emoji",
+			ref:  "❤️",
+			hyp:  "💙",
+			want: CER{
+				Value:       1.0,
+				Distance:    2,
+				ManifestLen: 2,
+				H:           0,
+				S:           1,
+				D:           1,
+				I:           0,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

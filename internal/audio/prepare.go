@@ -84,25 +84,38 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 	}()
 
 	var out []Result
+	var errorCount int
 	for res := range results {
 		out = append(out, res)
+		if res.Status == "error" {
+			errorCount++
+		}
+	}
+	if errorCount > 0 {
+		return out, fmt.Errorf("Подготовка завершена с %d ошибками", errorCount)
 	}
 
 	return out, nil
 }
 
 func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig, audioDir string, ffArgs []string) Result {
-	source := filepath.FromSlash(rec.Audio)
+	source := filepath.FromSlash(filepath.Join(config.OutDir, rec.Audio))
 	if source == "" {
 		return Result{ID: rec.ID,
 			Status: "error",
 			Error:  "Нет пути к аудио",
 		}
 	}
+	if _, err := os.Stat(source); os.IsNotExist(err) {
+		return Result{ID: rec.ID,
+			Status: "error",
+			Error:  "Аудиофайл не найден",
+		}
+	}
 	destination := filepath.Join(audioDir, rec.ID+".wav")
 	tmp := destination + ".tmp"
 
-	if canSkip(destination) {
+	if canSkip(destination, rec.SHA256) {
 		return Result{
 			ID:     rec.ID,
 			Status: "skipped",
@@ -188,10 +201,17 @@ func ReadRecords(path string) ([]corpus.Record, error) {
 	return list, scanner.Err()
 }
 
-func canSkip(path string) bool {
+func canSkip(path string, expSHA string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
 		return false
 	}
-	return info.Size() > 0
+	if info.Size() == 0 {
+		return false
+	}
+	actSHA, err := corpus.SHA256(path)
+	if err != nil {
+		return false
+	}
+	return actSHA == expSHA
 }

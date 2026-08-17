@@ -73,24 +73,24 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Ошика вычисления sha256 для %s: %w", dstPath, err)
 		}
-
-		sampleRate := 16000
-		channels := 1
-		durationS := int64(rec.Duration * 1000)
+		audioInf, err := Probe(dstPath)
+		if err != nil {
+			return nil, fmt.Errorf("Ошибка ffprobe")
+		}
 
 		finalRecords = append(finalRecords, Record{
 			ID:         rec.ID,
 			Audio:      filepath.ToSlash(filepath.Join("audio", rec.ID+".wav")),
 			Text:       rec.Text,
 			Language:   "ru",
-			Duration:   int64(durationS),
-			SampleRate: sampleRate,
-			Channels:   channels,
+			Duration:   audioInf.DurationMS,
+			SampleRate: audioInf.SampleRate,
+			Channels:   audioInf.Channels,
 			Tags:       []string{rec.Domain},
 			SHA256:     sha256Hash,
 		})
 		selected_ids = append(selected_ids, rec.ID)
-		totalDuration += durationS
+		totalDuration += audioInf.DurationMS
 
 	}
 

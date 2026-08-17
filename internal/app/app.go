@@ -88,8 +88,8 @@ func (a *ImportApp) Run() error {
 	config := corpus.ImportConfig{
 		ArchivePath: a.archivePath,
 		OutDir:      a.outPath,
-		Limit:       250,
-		MaxDuration: 30 * time.Minute,
+		Limit:       a.limit,
+		MaxDuration: a.maxDuration,
 		Seed:        a.seed,
 		Quotas:      a.quotas,
 	}
@@ -293,7 +293,10 @@ func (a *AudioPrepareApp) Run() error {
 	}
 	results, err := audio.Prepare(config)
 	if err != nil {
-		fmt.Printf("Ошибка: %v", err)
+		return fmt.Errorf("Ошибка подготовки аудио: %w", err)
+	}
+	if len(results) == 0 {
+		return fmt.Errorf("Результаты подготовки пустые")
 	}
 	ok, skipped, errCount := 0, 0, 0
 	for _, r := range results {

@@ -151,6 +151,20 @@ func TestWER(t *testing.T) {
 				I:           0,
 			},
 		},
+		{
+			name: "emoji",
+			ref:  []string{"Привет", "❤️", "мир"},
+			hyp:  []string{"Привет", "💙", "мир"},
+			want: WER{
+				Value:       1.0 / 3.0,
+				Distance:    1,
+				ManifestLen: 3,
+				H:           2,
+				S:           1,
+				D:           0,
+				I:           0,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
