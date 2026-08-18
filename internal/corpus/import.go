@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -32,16 +33,18 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка чтения farfield/manifest.jsonl: %w", err)
 	}
-	crowdRecords, err := parseManifest(crowdData, "crowd", config.Seed)
+	crowdRecords, crowdSkip, crowdInvalid, err := parseManifest(crowdData, "crowd", config.Seed)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка парсинга файла crowd: %w", err)
 	}
-	farfieldRecords, err := parseManifest(farfieldData, "farfield", config.Seed)
+	farfieldRecords, farfieldSkip, farfieldInvalid, err := parseManifest(farfieldData, "farfield", config.Seed)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка парсинга файла farfield: %w", err)
 	}
 
 	allRecords := append(crowdRecords, farfieldRecords...)
+	totalSkip := crowdSkip + farfieldSkip
+	totalInvalid :=crowdInvalid+farfieldInvalid
 
 	selected := SelectRecord(allRecords, config.Quotas, config.Limit)
 
@@ -53,29 +56,54 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	var finalRecords []Record
 	var totalDuration int64
 	var selected_ids []string
+	var importErrors []string
+	var durationErrors []string
+	var missingAudioErrors int
+
+	usedFiles := make(map[string]string)
 
 	for _, rec := range selected {
+		normalizedPath := filepath.ToSlash(rec.AudioFilepath)
+		if existingID, exists := usedFiles[normalizedPath]; exists {
+			importErrors = append(importErrors, fmt.Sprintf("Запись %s: дублирование аудиофайла %s (уже используется записью %s)",
+				rec.ID, normalizedPath, existingID))
+			continue
+		}
+		usedFiles[normalizedPath] = rec.ID
 
 		if config.MaxDuration > 0 && time.Duration(rec.Duration*float64(time.Second)) > config.MaxDuration {
+			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, длительность: %.2f сек. максимальная длительность: %s", rec.ID, rec.Duration, config.MaxDuration))
 			continue
 		}
 		filename := filepath.Base(rec.AudioFilepath)
 		srcPath := filepath.Join(tmpDir, "test", rec.Domain, "files", filename)
 		if _, err := os.Stat(srcPath); os.IsNotExist(err) {
+			missingAudioErrors++
+			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, аудио файл %s не был найден", rec.ID, srcPath))
 			continue
 		}
 		dstPath := filepath.Join(audioDir, rec.ID+".wav")
 		if err := copyFile(srcPath, dstPath); err != nil {
-			return nil, fmt.Errorf("Ошибка копирования аудио %s: %w", rec.ID, err)
+			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, ошибка копирования: %s", rec.ID, err))
+			continue
 		}
 
 		sha256Hash, err := FindSHA256(dstPath)
 		if err != nil {
-			return nil, fmt.Errorf("Ошика вычисления sha256 для %s: %w", dstPath, err)
+			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, ошибка SHA256: %s", rec.ID, err))
+			os.Remove(dstPath)
+			continue
 		}
 		audioInf, err := Probe(dstPath)
 		if err != nil {
-			return nil, fmt.Errorf("Ошибка ffprobe")
+			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, ошибка ffprobe: %s", rec.ID, err))
+		}
+		manifestDuration := int64(rec.Duration * 1000)
+		realDuration := audioInf.DurationMS
+		diff := realDuration - manifestDuration
+		maxDiff := int64(float64(manifestDuration) * 0.1)
+		if math.Abs(float64(diff)) > float64(maxDiff) && manifestDuration > 0 {
+			durationErrors = append(durationErrors, fmt.Sprintf("Разница в длительности для %s: по манифесту: %dms, в реальности: %dms %.1f%%", rec.ID, manifestDuration, realDuration, float64(diff)/float64(manifestDuration)*100))
 		}
 
 		finalRecords = append(finalRecords, Record{
@@ -83,7 +111,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 			Audio:      filepath.ToSlash(filepath.Join("audio", rec.ID+".wav")),
 			Text:       rec.Text,
 			Language:   "ru",
-			Duration:   audioInf.DurationMS,
+			Duration:   realDuration,
 			SampleRate: audioInf.SampleRate,
 			Channels:   audioInf.Channels,
 			Tags:       []string{rec.Domain},
@@ -120,7 +148,13 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		SelectedRecord:   len(finalRecords),
 		SelectedDuration: totalDuration,
 		ByTag:            countByTag(finalRecords),
-		Skipped:          map[string]int{},
+		Skipped: map[string]int{
+			"empty_text":        totalSkip,
+			"missing_audio":     missingAudioErrors,
+			"invalid_manifest": totalInvalid,
+		},
+		Errors:           importErrors,
+		DurationWarnings: durationErrors,
 	}
 	summaryPath := filepath.Join(config.OutDir, "import-summary.json")
 	if err := writeJSON(summaryPath, summary); err != nil {

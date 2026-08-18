@@ -31,11 +31,18 @@ type Result struct {
 }
 
 func Prepare(config PrepareConfig) ([]Result, error) {
+	isValid := map[string]bool{
+		"wav-16k": true,
+		"wav-8k":  true,
+	}
+	if !isValid[config.Profile] {
+		return nil, fmt.Errorf("Неизвестный профлиль %s", config.Profile)
+	}
 	records, err := ReadRecords(config.ManifestPath)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка чтения манифеста: %w", err)
 	}
-
+	manifestDir := filepath.Dir(config.ManifestPath)
 	audioDir := filepath.Join(config.OutDir, "audio")
 	if err := os.MkdirAll(audioDir, 0755); err != nil {
 		return nil, fmt.Errorf("Ошибка создания папки audio: %w", err)
@@ -66,7 +73,7 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 				case <-ctx.Done():
 					return
 				default:
-					result := processRecord(ctx, rec, config, audioDir, ffmpegArgs)
+					result := processRecord(ctx, rec, config, manifestDir, audioDir, ffmpegArgs)
 					results <- result
 				}
 			}
@@ -84,22 +91,37 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 	}()
 
 	var out []Result
-	var errorCount int
+	var okCount, skipCount, errorCount int
+	var errorResults []Result
+
 	for res := range results {
 		out = append(out, res)
-		if res.Status == "error" {
+		switch res.Status {
+		case "ok":
+			okCount++
+		case "skipped":
+			skipCount++
+		case "error":
 			errorCount++
+			errorResults = append(errorResults, res)
 		}
 	}
+	fmt.Printf("\nСтатистика подготовки:\n")
+	fmt.Printf("Готово:   %d\n", okCount)
+	fmt.Printf("Пропущено: %d\n", skipCount)
+	fmt.Printf("Ошибок:   %d\n", errorCount)
 	if errorCount > 0 {
+		for _, res := range errorResults {
+			fmt.Printf("[%s] %s\n", res.ID, res.Error)
+		}
 		return out, fmt.Errorf("Подготовка завершена с %d ошибками", errorCount)
 	}
 
 	return out, nil
 }
 
-func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig, audioDir string, ffArgs []string) Result {
-	source := filepath.FromSlash(filepath.Join(config.OutDir, rec.Audio))
+func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig, manifestDir, audioDir string, ffArgs []string) Result {
+	source := filepath.Join(manifestDir, rec.Audio)
 	if source == "" {
 		return Result{ID: rec.ID,
 			Status: "error",
@@ -113,9 +135,23 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 		}
 	}
 	destination := filepath.Join(audioDir, rec.ID+".wav")
-	tmp := destination + ".tmp"
+	tmpFile, err := os.CreateTemp(audioDir, rec.ID+"-*.wav")
+	if err != nil {
+		return Result{
+			ID:     rec.ID,
+			Status: "error",
+			Error:  fmt.Sprintf("создание временного файла: %v", err),
+		}
+	}
+	tmp := tmpFile.Name()
+	tmpFile.Close()
+	defer func() {
+		if _, err := os.Stat(tmp); err == nil {
+			os.Remove(tmp)
+		}
+	}()
 
-	if canSkip(destination, rec.SHA256) {
+	if canSkip(destination, rec.SHA256, config.Profile) {
 		return Result{
 			ID:     rec.ID,
 			Status: "skipped",
@@ -125,7 +161,7 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 	ctx, cancel := context.WithTimeout(ctx, config.Timeout)
 	defer cancel()
 
-	args := []string{"-i", source}
+	args := []string{"-y", "-i", source}
 	args = append(args, ffArgs...)
 	args = append(args, tmp)
 
@@ -201,7 +237,7 @@ func ReadRecords(path string) ([]corpus.Record, error) {
 	return list, scanner.Err()
 }
 
-func canSkip(path string, expSHA string) bool {
+func canSkip(path string, expSHA string, profile string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
 		return false
@@ -213,5 +249,20 @@ func canSkip(path string, expSHA string) bool {
 	if err != nil {
 		return false
 	}
-	return actSHA == expSHA
+	if actSHA != expSHA {
+		return false
+	}
+	audioInfo, err := corpus.Probe(path)
+	if err != nil {
+		return false
+	}
+	switch profile {
+	case "wav-16k":
+		return audioInfo.SampleRate == 16000 && audioInfo.Channels == 1
+	case "wav-8k":
+		return audioInfo.SampleRate == 8000 && audioInfo.Channels == 1
+	default:
+		return false
+	}
+
 }

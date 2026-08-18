@@ -11,7 +11,7 @@ func TestParseManifest(t *testing.T) {
 	input := `{"audio_filepath":"files/1.wav","text":"привет мир","duration":2.5}
 	{"audio_filepath":"files/2.wav","text":"как дела","duration":1.8}`
 
-	result, err := parseManifest([]byte(input), "crowd", "test-seed")
+	result, _, _, err := parseManifest([]byte(input), "crowd", "test-seed")
 	if err != nil {
 		t.Errorf("ошибка: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestParseManifest(t *testing.T) {
 func TestParseManifest_InvalidJSON(t *testing.T) {
 	input := `{"audio_filepath":"files/1.wav","text":"привет мир","duration":2.5`
 
-	_, err := parseManifest([]byte(input), "crowd", "test-seed")
+	_, _, _, err := parseManifest([]byte(input), "crowd", "test-seed")
 	if err == nil {
 		t.Error("Ожидалась ошибка json, но ее нет")
 	}
@@ -53,7 +53,7 @@ func TestValidate_MissingAudio(t *testing.T) {
 func TestParseManifest_EmptyText(t *testing.T) {
 	input := `{"audio_filepath":"files/1.wav","text":"","duration":2.5}`
 
-	result, err := parseManifest([]byte(input), "crowd", "test-seed")
+	result, _, _, err := parseManifest([]byte(input), "crowd", "test-seed")
 	if err != nil {
 		t.Errorf("Ошибка: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestParseManifest_EmptyText(t *testing.T) {
 func TestParseManifest_Duration(t *testing.T) {
 	input := `{"audio_filepath":"files/1.wav","text":"привет","duration":2.84}`
 
-	result, err := parseManifest([]byte(input), "crowd", "test-seed")
+	result, _, _, err := parseManifest([]byte(input), "crowd", "test-seed")
 	if err != nil {
 		t.Errorf("ошибка: %v", err)
 	}
@@ -84,13 +84,13 @@ func TestParseManifest_Domain(t *testing.T) {
 	input := `{"audio_filepath":"files/1.wav","text":"привет","duration":2.5}`
 
 	// crowd
-	result, _ := parseManifest([]byte(input), "crowd", "test-seed")
+	result, _, _, _ := parseManifest([]byte(input), "crowd", "test-seed")
 	if result[0].Domain != "crowd" {
 		t.Errorf("domain = %q, want %q", result[0].Domain, "crowd")
 	}
 
 	// farfield
-	result, _ = parseManifest([]byte(input), "farfield", "test-seed")
+	result, _, _, _ = parseManifest([]byte(input), "farfield", "test-seed")
 	if result[0].Domain != "farfield" {
 		t.Errorf("domain = %q, want %q", result[0].Domain, "farfield")
 	}
@@ -100,8 +100,8 @@ func TestParseManifest_Domain(t *testing.T) {
 func TestStableID(t *testing.T) {
 	input := `{"audio_filepath":"files/1.wav","text":"привет","duration":2.5}`
 
-	result1, _ := parseManifest([]byte(input), "crowd", "test-seed")
-	result2, _ := parseManifest([]byte(input), "crowd", "test-seed")
+	result1, _, _, _ := parseManifest([]byte(input), "crowd", "test-seed")
+	result2, _, _, _ := parseManifest([]byte(input), "crowd", "test-seed")
 
 	if result1[0].ID != result2[0].ID {
 		t.Errorf("ID не стабильный: %q != %q", result1[0].ID, result2[0].ID)
@@ -195,7 +195,7 @@ func TestValidate_DuplicateFile(t *testing.T) {
 	}
 }
 
-//Неверная SHA-256
+// Неверная SHA-256
 func TestValidate_BadSHA256(t *testing.T) {
 	dir := t.TempDir()
 	audioPath := filepath.Join(dir, "test.wav")

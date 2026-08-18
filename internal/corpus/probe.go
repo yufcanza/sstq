@@ -1,10 +1,12 @@
 package corpus
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
 	"strconv"
+	"time"
 )
 
 type AudioInfo struct {
@@ -14,12 +16,21 @@ type AudioInfo struct {
 }
 
 func Probe(filePath string) (*AudioInfo, error) {
+	timeout := 5 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	if _, err := exec.LookPath("ffprobe"); err != nil {
+		return nil, fmt.Errorf("ffprobe не найден в PATH: %w", err)
+	}
 	cmd := exec.Command("ffprobe",
 		"-v", "quiet",
 		"-print_format", "json",
 		"-show_streams", filePath)
 	output, err := cmd.Output()
 	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return nil, fmt.Errorf("ffprobe timeout %v для %s", timeout, filePath)
+		}
 		return nil, fmt.Errorf("ffprobe: %w", err)
 	}
 	var result struct {

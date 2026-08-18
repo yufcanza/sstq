@@ -85,8 +85,10 @@ func (r *Reader) ReadHypotheses(path string) ([]Hypothesis, error) {
 	return hypotheses, nil
 }
 
-func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, error) {
+func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, int, int, error) {
 	var records []ProcessedRecord
+	var skipped int
+	var invalid int
 
 	lines := strings.Split(string(data), "\n")
 	for _, line := range lines {
@@ -97,9 +99,11 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 
 		var raw GolosRecord
 		if err := json.Unmarshal([]byte(line), &raw); err != nil {
-			return nil, fmt.Errorf("Ошибка обработки JSON: %w", err)
+			invalid++
+			return nil, 0, 0, fmt.Errorf("Ошибка обработки JSON: %w", err)
 		}
 		if strings.TrimSpace(raw.Text) == "" {
+			skipped++
 			continue
 		}
 
@@ -118,5 +122,5 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 			SortHash:      sortHash,
 		})
 	}
-	return records, nil
+	return records, skipped, invalid, nil
 }

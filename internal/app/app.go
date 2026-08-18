@@ -298,18 +298,6 @@ func (a *AudioPrepareApp) Run() error {
 	if len(results) == 0 {
 		return fmt.Errorf("Результаты подготовки пустые")
 	}
-	ok, skipped, errCount := 0, 0, 0
-	for _, r := range results {
-		switch r.Status {
-		case "ok":
-			ok++
-		case "skipped":
-			skipped++
-		case "error":
-			errCount++
-		}
-	}
-	fmt.Printf("\nГотово: %d, пропущено: %d, ошибок: %d", ok, skipped, errCount)
 	return nil
 }
 

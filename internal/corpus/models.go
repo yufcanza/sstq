@@ -57,6 +57,8 @@ type ImportSummary struct {
 	SelectedDuration int64          `json:"selected_duration_ms"`
 	ByTag            map[string]int `json:"by_tag"`
 	Skipped          map[string]int `json:"skipped"`
+	Errors           []string       `json:"errors,omitempty"`
+	DurationWarnings []string       `json:"duration_warnings,omitempty"`
 }
 type SelectionInfo struct {
 	Source         string         `json:"source"`
