@@ -44,7 +44,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 
 	allRecords := append(crowdRecords, farfieldRecords...)
 	totalSkip := crowdSkip + farfieldSkip
-	totalInvalid :=crowdInvalid+farfieldInvalid
+	totalInvalid := crowdInvalid + farfieldInvalid
 
 	selected := SelectRecord(allRecords, config.Quotas, config.Limit)
 
@@ -61,9 +61,12 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	var missingAudioErrors int
 
 	usedFiles := make(map[string]string)
+	var selectedDuration time.Duration
 
 	for _, rec := range selected {
-		normalizedPath := filepath.ToSlash(rec.AudioFilepath)
+		filename := filepath.Base(rec.AudioFilepath)
+		srcPath := filepath.Join(tmpDir, "test", rec.Domain, "files", filename)
+		normalizedPath := filepath.ToSlash(srcPath)
 		if existingID, exists := usedFiles[normalizedPath]; exists {
 			importErrors = append(importErrors, fmt.Sprintf("Запись %s: дублирование аудиофайла %s (уже используется записью %s)",
 				rec.ID, normalizedPath, existingID))
@@ -71,12 +74,11 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		}
 		usedFiles[normalizedPath] = rec.ID
 
-		if config.MaxDuration > 0 && time.Duration(rec.Duration*float64(time.Second)) > config.MaxDuration {
-			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, длительность: %.2f сек. максимальная длительность: %s", rec.ID, rec.Duration, config.MaxDuration))
+		recDuration:=time.Duration(rec.Duration*1000)
+		if config.MaxDuration > 0 && selectedDuration+recDuration > config.MaxDuration {
+			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, превышена общая длительность: %.2f сек. максимальная длительность: %s", rec.ID, selectedDuration.Seconds(), config.MaxDuration))
 			continue
 		}
-		filename := filepath.Base(rec.AudioFilepath)
-		srcPath := filepath.Join(tmpDir, "test", rec.Domain, "files", filename)
 		if _, err := os.Stat(srcPath); os.IsNotExist(err) {
 			missingAudioErrors++
 			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, аудио файл %s не был найден", rec.ID, srcPath))
@@ -97,6 +99,21 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		audioInf, err := Probe(dstPath)
 		if err != nil {
 			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, ошибка ffprobe: %s", rec.ID, err))
+			durationMs := int64(rec.Duration * 1000)
+			finalRecords = append(finalRecords, Record{
+				ID:         rec.ID,
+				Audio:      filepath.ToSlash(filepath.Join("audio", rec.ID+".wav")),
+				Text:       rec.Text,
+				Language:   "ru",
+				Duration:   durationMs,
+				SampleRate: 16000,
+				Channels:   1,
+				Tags:       []string{rec.Domain},
+				SHA256:     sha256Hash,
+			})
+			selected_ids = append(selected_ids, rec.ID)
+			totalDuration += durationMs
+			continue
 		}
 		manifestDuration := int64(rec.Duration * 1000)
 		realDuration := audioInf.DurationMS
@@ -119,6 +136,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		})
 		selected_ids = append(selected_ids, rec.ID)
 		totalDuration += audioInf.DurationMS
+		selectedDuration += time.Duration(realDuration)*1000
 
 	}
 
@@ -149,8 +167,8 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		SelectedDuration: totalDuration,
 		ByTag:            countByTag(finalRecords),
 		Skipped: map[string]int{
-			"empty_text":        totalSkip,
-			"missing_audio":     missingAudioErrors,
+			"empty_text":       totalSkip,
+			"missing_audio":    missingAudioErrors,
 			"invalid_manifest": totalInvalid,
 		},
 		Errors:           importErrors,

@@ -28,11 +28,18 @@ func TestParseManifest(t *testing.T) {
 
 // Неверный JSON
 func TestParseManifest_InvalidJSON(t *testing.T) {
-	input := `{"audio_filepath":"files/1.wav","text":"привет мир","duration":2.5`
-
-	_, _, _, err := parseManifest([]byte(input), "crowd", "test-seed")
-	if err == nil {
-		t.Error("Ожидалась ошибка json, но ее нет")
+	manifestContent := `{"audio_filepath":"files/1.wav","text":"текст 1","duration":1.0}
+	{это не json
+	{"audio_filepath":"files/2.wav","text":"текст 2","duration":2.0}`
+	records, _, invalid, err := parseManifest([]byte(manifestContent), "crowd", "test-seed")
+	if err != nil {
+		t.Error(" got nil, want error for invalid JSON")
+	}
+	if len(records) != 2 {
+		t.Errorf("got %d records, want 0", len(records))
+	}
+	if invalid != 1 {
+		t.Errorf("got %d invalid, want 0", invalid)
 	}
 }
 

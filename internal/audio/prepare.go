@@ -59,6 +59,7 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 
 	tasks := make(chan corpus.Record, len(records))
 	results := make(chan Result, len(records))
+	updated := make(chan corpus.Record, len(records))
 
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
@@ -73,8 +74,11 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 				case <-ctx.Done():
 					return
 				default:
-					result := processRecord(ctx, rec, config, manifestDir, audioDir, ffmpegArgs)
+					result, updatedRec := processRecord(ctx, rec, config, manifestDir, audioDir, ffmpegArgs)
 					results <- result
+					if result.Status == "ok" || result.Status == "skipped" {
+						updated <- updatedRec
+					}
 				}
 			}
 		}()
@@ -88,11 +92,13 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 	go func() {
 		wg.Wait()
 		close(results)
+		close(updated)
 	}()
 
 	var out []Result
 	var okCount, skipCount, errorCount int
 	var errorResults []Result
+	updatedByID := make(map[string]corpus.Record)
 
 	for res := range results {
 		out = append(out, res)
@@ -106,6 +112,22 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 			errorResults = append(errorResults, res)
 		}
 	}
+	for rec := range updated {
+		updatedByID[rec.ID] = rec
+	}
+	var finalRecords []corpus.Record
+	for _, rec := range records {
+		if u, ok := updatedByID[rec.ID]; ok {
+			finalRecords = append(finalRecords, u)
+		} else {
+			finalRecords = append(finalRecords, rec)
+		}
+	}
+	newManifestPath := filepath.Join(config.OutDir, "manifest.jsonl")
+	if err := corpus.NewWriter().WriteManifest(newManifestPath, finalRecords); err != nil {
+		return out, fmt.Errorf("Ошибка записи обновленного манифеста: %w", err)
+	}
+
 	fmt.Printf("\nСтатистика подготовки:\n")
 	fmt.Printf("Готово:   %d\n", okCount)
 	fmt.Printf("Пропущено: %d\n", skipCount)
@@ -120,28 +142,45 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 	return out, nil
 }
 
-func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig, manifestDir, audioDir string, ffArgs []string) Result {
+func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig, manifestDir, audioDir string, ffArgs []string) (Result, corpus.Record) {
 	source := filepath.Join(manifestDir, rec.Audio)
 	if source == "" {
 		return Result{ID: rec.ID,
 			Status: "error",
 			Error:  "Нет пути к аудио",
-		}
+		}, rec
 	}
 	if _, err := os.Stat(source); os.IsNotExist(err) {
 		return Result{ID: rec.ID,
 			Status: "error",
 			Error:  "Аудиофайл не найден",
-		}
+		}, rec
 	}
 	destination := filepath.Join(audioDir, rec.ID+".wav")
+	if canSkip(destination, rec, config.Profile) {
+		updated := rec
+		updated.Audio = filepath.ToSlash(filepath.Join("audio", rec.ID+".wav"))
+		if sha, err := corpus.SHA256(destination); err != nil {
+			updated.SHA256 = sha
+		}
+		if info, err := corpus.Probe(destination); err == nil {
+			updated.Duration = info.DurationMS
+			updated.SampleRate = info.SampleRate
+			updated.Channels = info.Channels
+		}
+		return Result{
+			ID:     rec.ID,
+			Status: "skipped",
+		}, updated
+
+	}
 	tmpFile, err := os.CreateTemp(audioDir, rec.ID+"-*.wav")
 	if err != nil {
 		return Result{
 			ID:     rec.ID,
 			Status: "error",
 			Error:  fmt.Sprintf("создание временного файла: %v", err),
-		}
+		}, rec
 	}
 	tmp := tmpFile.Name()
 	tmpFile.Close()
@@ -151,13 +190,6 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 		}
 	}()
 
-	if canSkip(destination, rec.SHA256, config.Profile) {
-		return Result{
-			ID:     rec.ID,
-			Status: "skipped",
-		}
-
-	}
 	ctx, cancel := context.WithTimeout(ctx, config.Timeout)
 	defer cancel()
 
@@ -173,14 +205,14 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 			ID:     rec.ID,
 			Status: "error",
 			Error:  err.Error(),
-		}
+		}, rec
 	}
 	if err := cmd.Start(); err != nil {
 		return Result{
 			ID:     rec.ID,
 			Status: "error",
 			Error:  err.Error(),
-		}
+		}, rec
 	}
 	errOutput, _ := io.ReadAll(stderr)
 
@@ -191,14 +223,14 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 				ID:     rec.ID,
 				Status: "error",
 				Error:  "Таймаут:" + string(errOutput),
-			}
+			}, rec
 
 		}
 		return Result{
 			ID:     rec.ID,
 			Status: "error",
 			Error:  err.Error() + string(errOutput),
-		}
+		}, rec
 	}
 
 	if err := os.Rename(tmp, destination); err != nil {
@@ -207,10 +239,23 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 			ID:     rec.ID,
 			Status: "error",
 			Error:  "Ошибка переименования: " + err.Error(),
-		}
+		}, rec
+	}
+	updated := rec
+	updated.Audio = filepath.ToSlash(filepath.Join("audio", rec.ID+".wav"))
+
+	if sha, err := corpus.SHA256(destination); err == nil {
+		updated.SHA256 = sha
+	} else {
+		return Result{ID: rec.ID, Status: "error", Error: "Ошибка SHA: " + err.Error()}, rec
+	}
+	if info, err := corpus.Probe(destination); err == nil {
+		updated.Duration = info.DurationMS
+		updated.SampleRate = info.SampleRate
+		updated.Channels = info.Channels
 	}
 
-	return Result{ID: rec.ID, Status: "ok"}
+	return Result{ID: rec.ID, Status: "ok"}, updated
 }
 
 func ReadRecords(path string) ([]corpus.Record, error) {
@@ -237,7 +282,7 @@ func ReadRecords(path string) ([]corpus.Record, error) {
 	return list, scanner.Err()
 }
 
-func canSkip(path string, expSHA string, profile string) bool {
+func canSkip(path string, rec corpus.Record, profile string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
 		return false
@@ -245,12 +290,11 @@ func canSkip(path string, expSHA string, profile string) bool {
 	if info.Size() == 0 {
 		return false
 	}
-	actSHA, err := corpus.SHA256(path)
-	if err != nil {
-		return false
-	}
-	if actSHA != expSHA {
-		return false
+	if rec.SHA256 != "" {
+		sha, err := corpus.SHA256(path)
+		if err != nil || sha != rec.SHA256 {
+			return false
+		}
 	}
 	audioInfo, err := corpus.Probe(path)
 	if err != nil {
@@ -265,4 +309,5 @@ func canSkip(path string, expSHA string, profile string) bool {
 		return false
 	}
 
+	
 }

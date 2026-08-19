@@ -100,7 +100,7 @@ func parseManifest(data []byte, domain string, seed string) ([]ProcessedRecord, 
 		var raw GolosRecord
 		if err := json.Unmarshal([]byte(line), &raw); err != nil {
 			invalid++
-			return nil, 0, 0, fmt.Errorf("Ошибка обработки JSON: %w", err)
+			continue
 		}
 		if strings.TrimSpace(raw.Text) == "" {
 			skipped++

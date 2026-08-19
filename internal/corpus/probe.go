@@ -22,7 +22,7 @@ func Probe(filePath string) (*AudioInfo, error) {
 	if _, err := exec.LookPath("ffprobe"); err != nil {
 		return nil, fmt.Errorf("ffprobe не найден в PATH: %w", err)
 	}
-	cmd := exec.Command("ffprobe",
+	cmd := exec.CommandContext(ctx, "ffprobe",
 		"-v", "quiet",
 		"-print_format", "json",
 		"-show_streams", filePath)
