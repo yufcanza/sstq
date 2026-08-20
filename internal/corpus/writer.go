@@ -112,6 +112,7 @@ func Validation(path string) (bool, error) {
 	Dir := filepath.Dir(path)
 	var errors []string
 	seenID := make(map[string]int)
+	seedAudio := make(map[string]int)
 	lineNum := 0
 
 	scanner := bufio.NewScanner(file)
@@ -137,10 +138,15 @@ func Validation(path string) (bool, error) {
 
 		if rec.Audio == "" {
 			errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: запись %q: поле  audio пустое", lineNum, rec.ID))
-		} else if strings.Contains(rec.Audio, "..") {
+		} else if strings.Contains(rec.Audio, "..") || filepath.IsAbs(rec.Audio) || filepath.IsAbs(filepath.FromSlash(rec.Audio)) {
 			errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q: audio path %q выходит за пределы каталога", lineNum, rec.ID, rec.Audio))
 		} else {
 			audioPath := filepath.Join(Dir, filepath.FromSlash(rec.Audio))
+			if prevLine, ok := seedAudio[audioPath]; ok {
+				errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q audio file %q уже используется в %d", lineNum, rec.ID, rec.Audio, prevLine))
+			} else {
+				seedAudio[audioPath] = lineNum
+			}
 			if _, err := os.Stat(audioPath); os.IsNotExist(err) {
 				errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: record %q audio file %q не найден", lineNum, rec.ID, rec.Audio))
 			} else {

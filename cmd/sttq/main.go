@@ -122,6 +122,10 @@ func runImport() {
 	}
 	StartImport := app.NewImportApp(*archivePath, quotaMap, *seed, *outPath, *limit, maxDuration)
 	if err := StartImport.Run(); err != nil {
+		if strings.Contains(err.Error(), "ffprobe не найден"){
+			fmt.Fprintf(os.Stderr, "Ошибка выполнения: %v\n", err)
+			os.Exit(2)
+		}
 		log.Fatalf("Ошибка выполнения: %v", err)
 	}
 }

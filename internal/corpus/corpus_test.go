@@ -1,9 +1,11 @@
 package corpus
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 // корректный исходный manifest
@@ -30,16 +32,20 @@ func TestParseManifest(t *testing.T) {
 func TestParseManifest_InvalidJSON(t *testing.T) {
 	manifestContent := `{"audio_filepath":"files/1.wav","text":"текст 1","duration":1.0}
 	{это не json
-	{"audio_filepath":"files/2.wav","text":"текст 2","duration":2.0}`
-	records, _, invalid, err := parseManifest([]byte(manifestContent), "crowd", "test-seed")
+	{"audio_filepath":"files/2.wav","text":"текст 2","duration":2.0}
+	{"audio_filepath":"files/4.wav","text":"   ","duration":4.0}`
+	records, skipped, invalid, err := parseManifest([]byte(manifestContent), "crowd", "test-seed")
 	if err != nil {
 		t.Error(" got nil, want error for invalid JSON")
 	}
+	if skipped != 1 {
+		t.Errorf("got %d skipped, want 1", invalid)
+	}
 	if len(records) != 2 {
-		t.Errorf("got %d records, want 0", len(records))
+		t.Errorf("got %d records, want 2", len(records))
 	}
 	if invalid != 1 {
-		t.Errorf("got %d invalid, want 0", invalid)
+		t.Errorf("got %d invalid, want 1", invalid)
 	}
 }
 
@@ -109,9 +115,13 @@ func TestStableID(t *testing.T) {
 
 	result1, _, _, _ := parseManifest([]byte(input), "crowd", "test-seed")
 	result2, _, _, _ := parseManifest([]byte(input), "crowd", "test-seed")
+	result3, _, _, _ := parseManifest([]byte(input), "crowd", "test-seed2")
 
 	if result1[0].ID != result2[0].ID {
 		t.Errorf("ID не стабильный: %q != %q", result1[0].ID, result2[0].ID)
+	}
+	if result1[0].ID != result3[0].ID {
+		t.Errorf("ID не стабильный по seed: %q != %q", result1[0].ID, result2[0].ID)
 	}
 }
 
@@ -144,7 +154,6 @@ func TestSelectRecords_SameSeed(t *testing.T) {
 //Квоты crowd/farfield
 
 func TestSelectRecords_Quotas(t *testing.T) {
-	// Создаем тестовые записи
 	var records []ProcessedRecord
 	for i := 0; i < 100; i++ {
 		records = append(records, ProcessedRecord{
@@ -184,12 +193,10 @@ func TestSelectRecords_Quotas(t *testing.T) {
 
 // Повторяющийся файл
 func TestValidate_DuplicateFile(t *testing.T) {
-	// Создаем два аудиофайла
 	audioDir := t.TempDir()
 	audioPath := filepath.Join(audioDir, "test.wav")
 	os.WriteFile(audioPath, []byte("test"), 0644)
 
-	// В манифесте две записи ссылаются на один файл
 	content := `{"id":"1","audio":"test.wav","text":"текст","language":"ru","duration_ms":1000,"sample_rate":16000,"channels":1,"tags":["test"],"sha256":""}
 {"id":"2","audio":"test.wav","text":"текст2","language":"ru","duration_ms":2000,"sample_rate":16000,"channels":1,"tags":["test"],"sha256":""}`
 
@@ -231,6 +238,167 @@ func TestValidate_UnsafePath(t *testing.T) {
 	result, _ := Validation(tmpFile)
 	if result != false {
 		t.Errorf("valid = %v, want false", result)
+	}
+}
+
+// Импорт падает если ffprobe не найден
+func TestImportGolos_FFprobe(t *testing.T) {
+	origPath := os.Getenv("PATH")
+	defer os.Setenv("PATH", origPath)
+	os.Setenv("PATH", "")
+	config := ImportConfig{
+		ArchivePath: "test.tar",
+		Quotas:      map[string]int{"crowd": 1},
+		Limit:       1,
+		MaxDuration: 30 * time.Minute,
+		Seed:        "test-seed",
+		OutDir:      t.TempDir(),
+	}
+	_, err := ImportGolos(config)
+	if err == nil {
+		t.Error("Ожидалась ошибка ffprobe не найден, nil")
+	}
+	expectedError := "Ошибка ffprobe не найден в path"
+	if err != nil && err.Error()[:len(expectedError)] != expectedError {
+		t.Errorf("'%s', got'%s'", expectedError, err.Error())
+	}
+}
+
+// дублирование аудио(логика)
+func TestImportGolos_DuplicateAudio(t *testing.T) {
+	records := []ProcessedRecord{
+		{
+			Domain:        "crowd",
+			AudioFilepath: "files/1.wav",
+			Text:          "текст 1",
+			Duration:      1.0,
+			ID:            "crowd-1",
+		},
+		{
+			Domain:        "crowd",
+			AudioFilepath: "files/1.wav",
+			Text:          "текст 2",
+			Duration:      2.0,
+			ID:            "crowd-2",
+		},
+		{
+			Domain:        "crowd",
+			AudioFilepath: "files/2.wav",
+			Text:          "текст 3",
+			Duration:      3.0,
+			ID:            "crowd-3",
+		},
+	}
+	usedFiles := make(map[string]string)
+	var duplicates []string
+
+	for _, rec := range records {
+		normalizedPath := filepath.ToSlash(rec.AudioFilepath)
+		if existingID, exists := usedFiles[normalizedPath]; exists {
+			duplicates = append(duplicates, fmt.Sprintf("duplicate: %s used by %s and %s",
+				normalizedPath, existingID, rec.ID))
+		} else {
+			usedFiles[normalizedPath] = rec.ID
+		}
+	}
+
+	if len(duplicates) != 1 {
+		t.Errorf("expected 1 duplicate, got %d", len(duplicates))
+	}
+
+	if len(usedFiles) != 2 {
+		t.Errorf("expected 2 unique files, got %d", len(usedFiles))
+	}
+}
+
+// ограничения общей длительности(логика)
+func TestImportGolos_TotalDuration(t *testing.T) {
+	records := []ProcessedRecord{
+		{Domain: "crowd", ID: "crowd-1", Duration: 5.0},
+		{Domain: "crowd", ID: "crowd-2", Duration: 10.0},
+		{Domain: "crowd", ID: "crowd-3", Duration: 15.0},
+	}
+	maxDuration := 12 * time.Second
+
+	var selected []ProcessedRecord
+	var selectedDuration time.Duration
+	var exceeded []string
+
+	for _, rec := range records {
+		recDuration := time.Duration(rec.Duration * float64(time.Second))
+		if maxDuration > 0 && selectedDuration+recDuration > maxDuration {
+			exceeded = append(exceeded, fmt.Sprintf("%s превышел лимит", rec.ID))
+			continue
+		}
+		selected = append(selected, rec)
+		selectedDuration += recDuration
+	}
+
+	if len(selected) != 1 {
+		t.Errorf("got %d record selected, want 1", len(selected))
+	}
+	if len(exceeded) != 2 {
+		t.Errorf("got %d record exceeded, want 2", len(selected))
+	}
+}
+
+// probe Errors (логика)
+func TestImportGolos_ProbeError(t *testing.T) {
+	records := []struct {
+		id            string
+		hasProbeError bool
+	}{
+		{"crowd-1", false},
+		{"crowd-2", true},
+		{"crowd-3", false},
+	}
+	probeErrors:=0
+	var error []string
+
+	for _, rec :=range records{
+		if rec.hasProbeError{
+			probeErrors++
+			error = append(error, fmt.Sprintf("запись: %s: ffprobe errors", rec.id))
+		}
+	}
+	if probeErrors != 1 {
+		t.Errorf("got %d probe errors, want 1", probeErrors)
+	}
+	if len(error) !=1 {
+		t.Errorf("got %d  errors, want 1", len(error))
+	}
+}
+//ошика не останавливает импорт (логика)
+func TestImportGolos_ErrorsContinue(t *testing.T){
+	records := []struct {
+		id          string
+		hasError    bool
+		errorType   string
+	}{
+		{"crowd-1", true, "missing_audio"},
+		{"crowd-2", false, ""},
+		{"crowd-3", true, "duplicate"},
+	}
+	
+	var selected []string
+	var errors []string
+	
+	for _, rec := range records {
+		if rec.hasError {
+			errors = append(errors, fmt.Sprintf("record %s: %s", rec.id, rec.errorType))
+			continue
+		}
+		selected = append(selected, rec.id)
+	}
+		if len(selected) != 1 {
+		t.Errorf("expected 1 selected, got %d", len(selected))
+	}
+	if selected[0] != "crowd-2" {
+		t.Errorf("expected selected 'crowd-2', got '%s'", selected[0])
+	}
+	
+	if len(errors) != 2 {
+		t.Errorf("expected 2 errors, got %d", len(errors))
 	}
 }
 

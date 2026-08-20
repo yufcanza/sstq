@@ -95,13 +95,13 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 		close(updated)
 	}()
 
-	var out []Result
 	var okCount, skipCount, errorCount int
 	var errorResults []Result
 	updatedByID := make(map[string]corpus.Record)
+	resultByID := make(map[string]Result, len(records))
 
 	for res := range results {
-		out = append(out, res)
+		resultByID[res.ID] = res
 		switch res.Status {
 		case "ok":
 			okCount++
@@ -114,6 +114,15 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 	}
 	for rec := range updated {
 		updatedByID[rec.ID] = rec
+	}
+	out := make([]Result, 0, len(records))
+	for _, rec := range records {
+		if res, ok := resultByID[rec.ID]; ok {
+			out = append(out, res)
+			if res.Status == "error" {
+				errorResults = append(errorResults, res)
+			}
+		}
 	}
 	var finalRecords []corpus.Record
 	for _, rec := range records {
@@ -160,7 +169,7 @@ func processRecord(ctx context.Context, rec corpus.Record, config PrepareConfig,
 	if canSkip(destination, rec, config.Profile) {
 		updated := rec
 		updated.Audio = filepath.ToSlash(filepath.Join("audio", rec.ID+".wav"))
-		if sha, err := corpus.SHA256(destination); err != nil {
+		if sha, err := corpus.SHA256(destination); err == nil {
 			updated.SHA256 = sha
 		}
 		if info, err := corpus.Probe(destination); err == nil {
@@ -290,11 +299,12 @@ func canSkip(path string, rec corpus.Record, profile string) bool {
 	if info.Size() == 0 {
 		return false
 	}
-	if rec.SHA256 != "" {
-		sha, err := corpus.SHA256(path)
-		if err != nil || sha != rec.SHA256 {
-			return false
-		}
+	if rec.SHA256 == "" {
+		return false
+	}
+	sha, err := corpus.SHA256(path)
+	if err != nil || sha != rec.SHA256 {
+		return false
 	}
 	audioInfo, err := corpus.Probe(path)
 	if err != nil {
@@ -309,5 +319,4 @@ func canSkip(path string, rec corpus.Record, profile string) bool {
 		return false
 	}
 
-	
 }

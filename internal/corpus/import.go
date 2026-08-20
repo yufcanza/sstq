@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"sttq/internal/atomicfile"
@@ -14,6 +15,9 @@ import (
 )
 
 func ImportGolos(config ImportConfig) (*ImportSummary, error) {
+	if _, err := exec.LookPath("ffprobe"); err != nil {
+		return nil, fmt.Errorf("Ошибка ffprobe не найден в path : %w", err)
+	}
 	tmpDir, err := os.MkdirTemp("", "golos-import-*")
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка создания временной папки:%w", err)
@@ -58,6 +62,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	var selected_ids []string
 	var importErrors []string
 	var durationErrors []string
+	var probeErrors int
 	var missingAudioErrors int
 
 	usedFiles := make(map[string]string)
@@ -74,7 +79,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		}
 		usedFiles[normalizedPath] = rec.ID
 
-		recDuration:=time.Duration(rec.Duration*1000)
+		recDuration := time.Duration(rec.Duration * float64(time.Second))
 		if config.MaxDuration > 0 && selectedDuration+recDuration > config.MaxDuration {
 			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, превышена общая длительность: %.2f сек. максимальная длительность: %s", rec.ID, selectedDuration.Seconds(), config.MaxDuration))
 			continue
@@ -98,21 +103,9 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		}
 		audioInf, err := Probe(dstPath)
 		if err != nil {
+			os.Remove(dstPath)
+			probeErrors++
 			importErrors = append(importErrors, fmt.Sprintf("Запись: %s, ошибка ffprobe: %s", rec.ID, err))
-			durationMs := int64(rec.Duration * 1000)
-			finalRecords = append(finalRecords, Record{
-				ID:         rec.ID,
-				Audio:      filepath.ToSlash(filepath.Join("audio", rec.ID+".wav")),
-				Text:       rec.Text,
-				Language:   "ru",
-				Duration:   durationMs,
-				SampleRate: 16000,
-				Channels:   1,
-				Tags:       []string{rec.Domain},
-				SHA256:     sha256Hash,
-			})
-			selected_ids = append(selected_ids, rec.ID)
-			totalDuration += durationMs
 			continue
 		}
 		manifestDuration := int64(rec.Duration * 1000)
@@ -136,7 +129,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 		})
 		selected_ids = append(selected_ids, rec.ID)
 		totalDuration += audioInf.DurationMS
-		selectedDuration += time.Duration(realDuration)*1000
+		selectedDuration += time.Duration(realDuration) * time.Millisecond
 
 	}
 
@@ -170,6 +163,7 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 			"empty_text":       totalSkip,
 			"missing_audio":    missingAudioErrors,
 			"invalid_manifest": totalInvalid,
+			"probe_failed":     probeErrors,
 		},
 		Errors:           importErrors,
 		DurationWarnings: durationErrors,
