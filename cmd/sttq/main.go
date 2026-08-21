@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -16,7 +15,7 @@ var version = "dev"
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
-		os.Exit(1)
+		os.Exit(2)
 	}
 	command := os.Args[1]
 	switch command {
@@ -37,48 +36,42 @@ func main() {
 	default:
 		fmt.Printf("Неизвестная команда: %s\n", command)
 		printUsage()
-		os.Exit(1)
+		os.Exit(2)
 	}
 
 }
 func printVersion() {
 	fmt.Printf("sstq version %s\n", version)
+	os.Exit(0)
 }
 func runEvaluate() {
-	flags := flag.NewFlagSet("evaluate", flag.ExitOnError)
+	flags := flag.NewFlagSet("evaluate", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var (
 		manPath = flags.String("manifest", "corpus/manifest.jsonl", "Путь к файлу с эталонами")
 		hypPath = flags.String("hypotheses", "run.jsonl", "Путь к файлу с гипотезами")
 		norm    = flags.String("normalization", "ru-default", "Профиль нормализации")
 		outPath = flags.String("out", "report.json", "Выход")
 	)
-	//fmt.Print(os.Args[1:], "\n")
-	flags.Parse(os.Args[2:])
-	//fmt.Printf("%v, %v, %v, %v", *manPath, *hypPath, *norm, *outPath)
-	if *manPath == "" {
-		log.Fatal("Не указан файл эталонов")
+	if err := flags.Parse(os.Args[2:]); err != nil {
+		os.Exit(2)
 	}
-	if *hypPath == "" {
-		log.Fatal("Не указан файл гипотез")
-	}
-	if *norm == "" {
-		log.Printf("Не указан профиль нормализации")
-	}
-	if *outPath == "" {
-		log.Printf("Не указан выходной файл")
+	if *manPath == "" || *hypPath == "" {
+		fmt.Fprintf(os.Stderr, "Не указан файл эталона или гипотез\n")
+		os.Exit(2)
 	}
 
 	StartEval := app.NewEvalApp(*manPath, *hypPath, *outPath, *norm)
 	if err := StartEval.Run(); err != nil {
-		log.Fatalf("Ошибка выполнения: %v", err)
+		exitErrors(err)
 	}
 
 }
 func runCorpus() {
 	if len(os.Args) < 3 {
-		log.Printf("Подкоманда corpus не задана")
+		fmt.Fprintf(os.Stderr, "Подкоманда corpus не задана\n")
 		printUsage()
-		os.Exit(0)
+		os.Exit(2)
 	}
 	subcommand := os.Args[2]
 	switch subcommand {
@@ -88,6 +81,10 @@ func runCorpus() {
 		runStats()
 	case "validate":
 		runValidate()
+	default:
+		fmt.Fprintf(os.Stderr, "Ошибка входных данных: неизвестная подкоманда corpus: %s\n", os.Args[2])
+		printUsage()
+		os.Exit(2)
 	}
 }
 
@@ -102,53 +99,55 @@ func (q *quotaSlice) String() string {
 }
 
 func runImport() {
-	flags := flag.NewFlagSet("import-golos", flag.ExitOnError)
+	flags := flag.NewFlagSet("import-golos", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var (
-		archivePath = flags.String("archive", "test.tar", "Путь к архиву")
-		//quota       = flag.String("quota", "crowd=200,farfield=50", "Квоты")
-		seed           = flags.String("seed", "intership-2026", "Сид")
+		archivePath    = flags.String("archive", "test.tar", "Путь к архиву")
+		seed           = flags.String("seed", "internship-2026", "Сид")
 		limit          = flags.Int("limit", 250, "Максимальное количество записей")
 		maxDurationStr = flags.String("max-duration", "30m", "Максимальная длительность одной записи")
 		outPath        = flags.String("out", "corpus", "Вывод")
 	)
 	var quotas quotaSlice
 	flags.Var(&quotas, "quota", "Квота")
-	//fmt.Print(os.Args[1:], "\n")
-	flags.Parse(os.Args[3:])
+	if err := flags.Parse(os.Args[3:]); err != nil {
+		os.Exit(2)
+	}
 	quotaMap := parseQuotas(quotas)
 	maxDuration, err := time.ParseDuration(*maxDurationStr)
 	if err != nil {
-		log.Fatalf("Некорректный --max-duration %q: %v", *maxDurationStr, err)
+		fmt.Fprintf(os.Stderr, "Некорректный --max-duration %q: %v\n", *maxDurationStr, err)
+		os.Exit(2)
 	}
 	StartImport := app.NewImportApp(*archivePath, quotaMap, *seed, *outPath, *limit, maxDuration)
 	if err := StartImport.Run(); err != nil {
-		if strings.Contains(err.Error(), "ffprobe не найден"){
-			fmt.Fprintf(os.Stderr, "Ошибка выполнения: %v\n", err)
-			os.Exit(2)
-		}
-		log.Fatalf("Ошибка выполнения: %v", err)
+		exitErrors(err)
 	}
 }
 func runStats() {
-	flags := flag.NewFlagSet("stats", flag.ExitOnError)
+	flags := flag.NewFlagSet("stats", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var manPath = flags.String("manifest", "corpus/manifest.jsonl", "Путь к эталонам")
-	flags.Parse(os.Args[3:])
-	//fmt.Printf("%v\n", *manPath)
+	if err := flags.Parse(os.Args[3:]); err != nil {
+		os.Exit(2)
+	}
 
 	StartStats := app.NewStatsApp(*manPath)
 	if err := StartStats.Run(); err != nil {
-		log.Fatalf("Ошибка выполнения: %v", err)
+		exitErrors(err)
 	}
 }
 func runValidate() {
-	flags := flag.NewFlagSet("validate", flag.ExitOnError)
+	flags := flag.NewFlagSet("validate", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var manPath = flags.String("manifest", "corpus/manifest.jsonl", "Путь к эталонам")
-	flags.Parse(os.Args[3:])
-	//fmt.Printf("%v\n", *manPath)
+	if err := flags.Parse(os.Args[3:]); err != nil {
+		os.Exit(2)
+	}
 
 	StartValidate := app.NewValidateApp(*manPath)
 	if err := StartValidate.Run(); err != nil {
-		log.Fatalf("Ошибка выполнения: %v", err)
+		exitErrors(err)
 	}
 }
 func parseQuotas(qs quotaSlice) map[string]int {
@@ -178,43 +177,48 @@ func parseQuotas(qs quotaSlice) map[string]int {
 }
 
 func runReport() {
-	flags := flag.NewFlagSet("report", flag.ExitOnError)
+	flags := flag.NewFlagSet("report", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var (
 		inputPath  = flags.String("input", "report.json", "Путь к json-отчету")
 		format     = flags.String("format", "html", "формат вывода: html")
 		outputPath = flags.String("out", "report.html", "Путь вывода отчета")
 	)
 
-	flags.Parse(os.Args[2:])
+	if err := flags.Parse(os.Args[2:]); err != nil {
+		os.Exit(2)
+	}
 	StartReport := app.NewReportApp(*inputPath, *format, *outputPath)
 	if err := StartReport.Run(); err != nil {
-		log.Fatalf("Ошибка: %v", err)
+		exitErrors(err)
 	}
 }
 
 func runCompare() {
-	flags := flag.NewFlagSet("compare", flag.ExitOnError)
+	flags := flag.NewFlagSet("compare", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var (
 		baseline = flags.String("baseline", "./reports/baseline.json", "Путь к baseline")
 		current  = flags.String("current", "./reports/current.json", "Путь к current")
 		maxWER   = flags.Float64("max-wer-delta", 0.02, "Максимальный порог WER")
 		maxCER   = flags.Float64("max-cer-delta", 0.02, "Максимальный порог CER")
 	)
-	flags.Parse(os.Args[2:])
+	if err := flags.Parse(os.Args[2:]); err != nil {
+		os.Exit(2)
+	}
 	StartCompare := app.NewCompareApp(*baseline, *current, *maxWER, *maxCER)
 	exitCode := StartCompare.Run()
 	os.Exit(exitCode)
 }
 
 func runAudioPrepare() {
-	if len(os.Args) < 3 {
-		log.Fatal("Использование: sttq audio prepare")
-	}
-	if os.Args[2] != "prepare" {
-		log.Fatal("Неккоректное использование: sttq audio prepare")
+	if len(os.Args) < 3 || os.Args[2] != "prepare" {
+		fmt.Fprintf(os.Stderr, "Ошибка подкоманды. Использование: sttq audio prepare\n")
 		printUsage()
+		os.Exit(2)
 	}
-	flags := flag.NewFlagSet("audio-prepare", flag.ExitOnError)
+	flags := flag.NewFlagSet("audio-prepare", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
 		profile      = flags.String("profile", "wav-16k", "профиль: wav-16-k или wav-8-k")
@@ -222,25 +226,28 @@ func runAudioPrepare() {
 		timeoutStr   = flags.String("timeout", "30s", "Таймаут на запись (в секундах)")
 		outDir       = flags.String("out", "./corpus", "выхоодная директория")
 	)
-	flags.Parse(os.Args[3:])
+	if err := flags.Parse(os.Args[3:]); err != nil {
+		os.Exit(2)
+	}
 	timeout, err := time.ParseDuration(*timeoutStr)
 	if err != nil {
-		log.Fatalf("Некорректный --max-duration %q: %v", *timeoutStr, err)
+		fmt.Fprintf(os.Stderr, "Некорректный --max-duration %q: %v\n", *timeoutStr, err)
+		os.Exit(2)
 	}
 	StartPrepare := app.NewAudioPrepareApp(*manifestPath, *profile, *workers, timeout, *outDir)
 	if err := StartPrepare.Run(); err != nil {
-		log.Fatalf("Ошибка: %v", err)
+		exitErrors(err)
 	}
 }
 func runRun() {
-	if len(os.Args) < 3 {
-		log.Fatal("Использование: run whispercpp")
-	}
-	if os.Args[2] != "whispercpp" {
-		log.Fatal("Неккоректное использование: sttq run whispercpp")
+	if len(os.Args) < 3 || os.Args[2] != "whispercpp" {
+		fmt.Fprintf(os.Stderr, "Ошибка подкоманды. Использование: sttq run whispercpp\n")
 		printUsage()
+		os.Exit(2)
 	}
-	flags := flag.NewFlagSet("run", flag.ExitOnError)
+
+	flags := flag.NewFlagSet("run", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
 	var (
 		manifestPath = flags.String("manifest", "./corpus/manifest.jsonl", "путь к манифесту")
 		binaryPath   = flags.String("binary", "bin/whisper-cli.exe", "путь к whisper-cli")
@@ -251,14 +258,17 @@ func runRun() {
 		resume       = flags.Bool("resume", false, "возобновить прогон")
 		outputPath   = flags.String("out", "./runs/whisper.jsonl", "путь для результатов")
 	)
-	flags.Parse(os.Args[3:])
+	if err := flags.Parse(os.Args[3:]); err != nil {
+		os.Exit(2)
+	}
 	timeout, err := time.ParseDuration(*timeoutStr)
 	if err != nil {
-		log.Fatalf("Некорректный --max-duration %q: %v", *timeoutStr, err)
+		fmt.Fprintf(os.Stderr, "Некорректный --timeout %q: %v\n", *timeoutStr, err)
+		os.Exit(2)
 	}
 	StartRun := app.NewRunApp(*manifestPath, *binaryPath, *modelPath, *language, *workers, timeout, *resume, *outputPath)
 	if err := StartRun.Run(); err != nil {
-		log.Fatalf("Ошибка: %v", err)
+		exitErrors(err)
 	}
 }
 
@@ -275,4 +285,23 @@ func printUsage() {
 	fmt.Println("compare				Сравнение в baseline")
 	fmt.Println("audio prepare			Подготовка аудио")
 	fmt.Println("run whispercpp			Запуск whisper.cpp")
+}
+
+func exitErrors(err error) {
+	if err == nil {
+		return
+	}
+	msg := strings.ToLower(err.Error())
+	isInput := strings.Contains(msg, "не найден") ||
+		strings.Contains(msg, "не существует") ||
+		strings.Contains(msg, "неизвестный") ||
+		strings.Contains(msg, "некорректный") ||
+		strings.Contains(msg, "ffprobe") ||
+		strings.Contains(msg, "ffmpeg")
+	if isInput {
+		fmt.Fprintf(os.Stderr, "Ошибка входных данных: %v\n", err)
+		os.Exit(2)
+	}
+	fmt.Fprintf(os.Stderr, "Ошибка выполнения: %v\n", err)
+	os.Exit(1)
 }

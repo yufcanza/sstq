@@ -51,7 +51,7 @@ func writeJSON(path string, data interface{}) error {
 func Statistic(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("Ошибка открытия файла:%w", err)
+		return fmt.Errorf("Файл эталонов не найден:%w", err)
 	}
 	defer file.Close()
 
@@ -86,7 +86,7 @@ func Statistic(path string) error {
 		channels[rec.Channels]++
 	}
 	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("Ошибка чления файла:%w", err)
+		return fmt.Errorf("Ошибка чтения файла:%w", err)
 	}
 
 	fmt.Printf("Records: %d\n", records)
@@ -105,7 +105,7 @@ func Statistic(path string) error {
 func Validation(path string) (bool, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return false, fmt.Errorf("Ошибка открытия файла:%w", err)
+		return false, fmt.Errorf("Файл эталонов не найден:%w", err)
 	}
 	defer file.Close()
 
@@ -113,6 +113,8 @@ func Validation(path string) (bool, error) {
 	var errors []string
 	seenID := make(map[string]int)
 	seedAudio := make(map[string]int)
+	var prevID string
+	hasPrevID := false
 	lineNum := 0
 
 	scanner := bufio.NewScanner(file)
@@ -129,6 +131,11 @@ func Validation(path string) (bool, error) {
 			errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: ID пустой", lineNum))
 		}
 		if rec.ID != "" {
+			if hasPrevID && rec.ID < prevID {
+				errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: нарушена сортировка: id %q идет после %q", lineNum, rec.ID, prevID))
+			}
+			prevID = rec.ID
+			hasPrevID = true
 			if prevLine, ok := seenID[rec.ID]; ok {
 				errors = append(errors, fmt.Sprintf("corpus/manifest.jsonl:%d: дубликат ID %q, впервые в строке %d", lineNum, rec.ID, prevLine))
 			} else {

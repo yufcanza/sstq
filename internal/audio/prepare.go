@@ -36,11 +36,14 @@ func Prepare(config PrepareConfig) ([]Result, error) {
 		"wav-8k":  true,
 	}
 	if !isValid[config.Profile] {
-		return nil, fmt.Errorf("Неизвестный профлиль %s", config.Profile)
+		return nil, fmt.Errorf("Неизвестный профиль %s", config.Profile)
+	}
+	if _, err := exec.LookPath("ffmpeg"); err != nil{
+		return nil, fmt.Errorf("ffmpeg не найден в PATH: %w", err)
 	}
 	records, err := ReadRecords(config.ManifestPath)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка чтения манифеста: %w", err)
+		return nil, fmt.Errorf("Файл эталонов не найден: %w", err)
 	}
 	manifestDir := filepath.Dir(config.ManifestPath)
 	audioDir := filepath.Join(config.OutDir, "audio")

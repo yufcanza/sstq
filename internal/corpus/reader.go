@@ -20,7 +20,7 @@ func NewReader() *Reader {
 func (r *Reader) ReadManifest(path string) ([]Manifest, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка открытия файла %s: %w", path, err)
+		return nil, fmt.Errorf("Файл не найден: %s: %w", path, err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -54,7 +54,7 @@ func (r *Reader) ReadManifest(path string) ([]Manifest, error) {
 func (r *Reader) ReadHypotheses(path string) ([]Hypothesis, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка открытия файла %s: %w", path, err)
+		return nil, fmt.Errorf("Файл не найден %s: %w", path, err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)

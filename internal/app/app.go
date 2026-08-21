@@ -42,11 +42,11 @@ func NewEvalApp(manPath, hypPath, outPath, normProfile string) *EvalApp {
 func (a *EvalApp) Run() error {
 	manifests, err := a.reader.ReadManifest(a.manPath)
 	if err != nil {
-		return fmt.Errorf("Ошибкк чтения эталонов: %w", err)
+		return fmt.Errorf("Файл эталонов не найден: %w", err)
 	}
 	hypotheses, err := a.reader.ReadHypotheses(a.hypPath)
 	if err != nil {
-		return fmt.Errorf("Ошибкк чтения гипотез: %w", err)
+		return fmt.Errorf("Файл гипотез не найден: %w", err)
 	}
 
 	result := corpus.Evaluate(manifests, hypotheses, a.normalizer)
@@ -114,7 +114,7 @@ func NewStatsApp(manifest string) *StatApp {
 func (a *StatApp) Run() error {
 	err := corpus.Statistic(a.manPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка статистики: %w", err)
+		return fmt.Errorf("Файл манифеста не найден: %w", err)
 	}
 	return nil
 }
@@ -131,7 +131,7 @@ func NewValidateApp(manifest string) *ValidateApp {
 func (a *ValidateApp) Run() error {
 	valid, err := corpus.Validation(a.manPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка статистики: %w", err)
+		return fmt.Errorf("Файл манифеста не найден: %w", err)
 	}
 	if !valid {
 		return fmt.Errorf("Corpus invalid")
@@ -158,10 +158,12 @@ func NewReportApp(inputPath, format, outputPath string) *ReportApp {
 func (a *ReportApp) Run() error {
 	switch a.format {
 	case "html":
-		return report.WriteHTML(a.inputPath, a.outputPath)
-
+		if err := report.WriteHTML(a.inputPath, a.outputPath); err !=nil{
+			return fmt.Errorf("Входной отчет не найден: %w", err)
+		}
+		return nil
 	default:
-		return fmt.Errorf("Ошибка формата: формат %s не поддрживается", a.format)
+		return fmt.Errorf("Ошибка формата: формат %s не поддерживается", a.format)
 	}
 }
 
@@ -328,7 +330,7 @@ func (a *RunApp) Run() error {
 
 	records, err := audio.ReadRecords(a.manifestPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка чтения манифеста: %w", err)
+		return fmt.Errorf("Файл эталонов не найден: %w", err)
 	}
 	resumeMgr, err := runner.NewResumeManager(a.outputPath)
 	if err != nil {
@@ -344,7 +346,7 @@ func (a *RunApp) Run() error {
 	if a.resume {
 		existing, err := readExistingResult(a.outputPath)
 		if err != nil {
-			return fmt.Errorf("Ошибка чтения текущих результатов: %w", err)
+			return fmt.Errorf("Файл гипотез не найден: %w", err)
 		}
 		allResult = append(allResult, existing...)
 	}

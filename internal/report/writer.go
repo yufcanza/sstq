@@ -20,7 +20,7 @@ func Write(path string, report Report) error {
 func WriteHTML(jsonPath, htmlPath string) error {
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
-		return fmt.Errorf("Ошибка чтения json: %w", err)
+		return fmt.Errorf("Входной отчет не найден: %w", err)
 	}
 
 	var report Report

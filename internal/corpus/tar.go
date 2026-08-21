@@ -28,7 +28,7 @@ func ExtractTar(tarPath, destdir string) error {
 			break
 		}
 		if err != nil {
-			return fmt.Errorf("Ошибка чтения архива: %w", err)
+			return fmt.Errorf("Архив не найден: %w", err)
 
 		}
 		if header.Typeflag == tar.TypeSymlink || header.Typeflag == tar.TypeLink {

@@ -25,17 +25,17 @@ func ImportGolos(config ImportConfig) (*ImportSummary, error) {
 	defer os.RemoveAll(tmpDir)
 
 	if err := ExtractTar(config.ArchivePath, tmpDir); err != nil {
-		return nil, fmt.Errorf("Ошика распаковки архива: %w", err)
+		return nil, fmt.Errorf("Архив не найден: %w", err)
 	}
 	crowdManifest := filepath.Join(tmpDir, "test", "crowd", "manifest.jsonl")
 	farfieldManifest := filepath.Join(tmpDir, "test", "farfield", "manifest.jsonl")
 	crowdData, err := os.ReadFile(crowdManifest)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка чтения crowd/manifest.jsonl: %w", err)
+		return nil, fmt.Errorf("crowd/manifest.jsonl не найден: %w", err)
 	}
 	farfieldData, err := os.ReadFile(farfieldManifest)
 	if err != nil {
-		return nil, fmt.Errorf("Ошибка чтения farfield/manifest.jsonl: %w", err)
+		return nil, fmt.Errorf("farfield/manifest.jsonl не найден: %w", err)
 	}
 	crowdRecords, crowdSkip, crowdInvalid, err := parseManifest(crowdData, "crowd", config.Seed)
 	if err != nil {
